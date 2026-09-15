@@ -1,0 +1,1825 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Markdown 読み上げ（スマホ最適 / 目次 / 速度ドロップダウン / 続きから）</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --bd: #e5e7eb;
+      --txt: #111827;
+      --muted: #6b7280;
+      --accent: #4f46e5;
+      --accent2: #eef2ff;
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--txt);
+      font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: linear-gradient(to bottom, rgba(246, 247, 249, 0.98), rgba(246, 247, 249, 0.92));
+      backdrop-filter: blur(10px);
+      padding-top: env(safe-area-inset-top);
+    }
+
+    .title {
+      font-size: 16px;
+      font-weight: 800;
+      margin: 10px 2px 10px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--bd);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+    }
+
+    .stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input[type="file"],
+    select,
+    button,
+    textarea,
+    input[type="text"] {
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+      font-size: 15px;
+    }
+
+    select {
+      width: 100%;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    button {
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      padding: 12px 14px;
+      font-weight: 700;
+    }
+
+    button.primary {
+      background: #111827;
+      border-color: #111827;
+      color: #fff;
+    }
+
+    button.ghost {
+      background: #fff;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .pill {
+      font-size: 12px;
+      background: #f3f4f6;
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: var(--txt);
+      border: 1px solid #e5e7eb;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .progress {
+      height: 10px;
+      border-radius: 999px;
+      background: var(--accent2);
+      border: 1px solid var(--bd);
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width .15s linear;
+    }
+
+    /* Speed buttons */
+    .speedGrid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    @media (min-width: 520px) {
+      .speedGrid {
+        grid-template-columns: repeat(8, 1fr);
+      }
+    }
+
+    .speedBtn {
+      padding: 10px 0;
+      border-radius: 14px;
+      text-align: center;
+      font-weight: 800;
+      background: #fff;
+      border: 1px solid #d1d5db;
+    }
+
+    .speedBtn.active {
+      background: var(--accent2);
+      border-color: #c7d2fe;
+      color: #1f2a9a;
+      box-shadow: inset 0 0 0 2px rgba(79, 70, 229, .15);
+    }
+
+    /* Preview */
+    .preview {
+      height: 52vh;
+      min-height: 360px;
+      max-height: 620px;
+      overflow: auto;
+      border: 1px solid var(--bd);
+      border-radius: var(--radius);
+      padding: 10px;
+      background: #fff;
+      scroll-behavior: smooth;
+    }
+
+    /* Preview header (sticky) */
+    .previewHeader {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px;
+      margin: -10px -10px 10px;
+      /* align with preview padding */
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+    }
+
+    .previewHeaderLeft {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .miniBtn {
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      background: #fff;
+      border: 1px solid #d1d5db;
+    }
+
+    .miniBtn:active {
+      transform: translateY(1px);
+    }
+
+    .miniBtn.primaryMini {
+      background: var(--accent2);
+      border-color: #c7d2fe;
+      color: #1f2a9a;
+    }
+
+    .previewHeaderRight {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .kbd {
+      font-size: 11px;
+      color: var(--muted);
+      border: 1px solid var(--bd);
+      background: #f9fafb;
+      padding: 4px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    /* Block picker (bottom sheet) */
+    .sheetBackdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.35);
+      z-index: 2000;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 12px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+
+    .sheetBackdrop.show {
+      display: flex;
+    }
+
+    .sheet {
+      width: min(980px, 100%);
+      max-height: 78vh;
+      background: #fff;
+      border: 1px solid var(--bd);
+      border-radius: 22px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .18);
+      overflow: hidden;
+    }
+
+    .sheetTop {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--bd);
+      background: rgba(246, 247, 249, 0.92);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .sheetTitle {
+      font-weight: 900;
+      font-size: 13px;
+      color: var(--txt);
+    }
+
+    .sheetBody {
+      padding: 10px 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .sheetList {
+      overflow: auto;
+      max-height: 58vh;
+      border: 1px solid var(--bd);
+      border-radius: 18px;
+      padding: 8px;
+      background: #fff;
+    }
+
+    .sheetItem {
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      display: grid;
+      gap: 4px;
+    }
+
+    .sheetItem:hover {
+      background: #f9fafb;
+    }
+
+    .sheetItem.active {
+      background: var(--accent2);
+      border-color: #c7d2fe;
+    }
+
+    .sheetItemTitle {
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .sheetItemSub {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .block {
+      border-radius: 14px;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid transparent;
+      position: relative;
+      scroll-margin-top: var(--previewScrollMarginTop, 64px);
+    }
+
+    .block:hover {
+      background: #f9fafb;
+    }
+
+    .block.active {
+      background: var(--accent2);
+      border-color: #c7d2fe;
+    }
+
+    .block.active::before {
+      content: "▶";
+      position: absolute;
+      left: 8px;
+      top: 10px;
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    .block.active>* {
+      padding-left: 18px;
+    }
+
+    .h1 {
+      font-size: 20px;
+      font-weight: 900;
+      margin: 0;
+    }
+
+    .h2 {
+      font-size: 18px;
+      font-weight: 900;
+      margin: 0;
+    }
+
+    .h3 {
+      font-size: 16px;
+      font-weight: 900;
+      margin: 0;
+    }
+
+    .p {
+      margin: 0;
+    }
+
+    .ul,
+    .ol {
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    .code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      background: #0b1020;
+      color: #e5e7eb;
+      padding: 10px;
+      border-radius: 14px;
+      overflow: auto;
+      white-space: pre;
+    }
+
+    strong {
+      font-weight: 900;
+    }
+
+    /* Collapsible markdown area */
+    details summary {
+      cursor: pointer;
+      font-weight: 800;
+      padding: 10px 2px;
+      list-style: none;
+    }
+
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details summary::after {
+      content: "▾";
+      float: right;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    details[open] summary::after {
+      content: "▴";
+    }
+
+    /* Big control buttons */
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 520px) {
+      .controls {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    .toggleRow {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--txt);
+    }
+
+    .toggle input {
+      width: 18px;
+      height: 18px;
+    }
+
+    .stickyBottom {
+      position: sticky;
+      bottom: 10px;
+      z-index: 4;
+    }
+
+    /* Bottom dock (fixed) */
+    body {
+      padding-bottom: calc(var(--dockH, 0px) + env(safe-area-inset-bottom));
+    }
+
+    .playerDock {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 999;
+      padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+      background: rgba(246, 247, 249, 0.92);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(229, 231, 235, 0.9);
+    }
+
+    .playerDockInner {
+      max-width: 980px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--bd);
+      border-radius: 18px;
+      padding: 6px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .06);
+    }
+
+    /* Compact one-line dock (mobile first)
+       - single row
+       - icons for main controls
+       - speed buttons are compact and horizontally scrollable
+    */
+    .dockRow {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      white-space: nowrap;
+      padding: 2px;
+    }
+
+    .dockRow::-webkit-scrollbar {
+      height: 0;
+    }
+
+    .iconBtn {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 900;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      flex: 0 0 auto;
+    }
+
+    .iconBtn.primary {
+      background: #111827;
+      border-color: #111827;
+      color: #fff;
+    }
+
+    .dockSpeed {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex: 0 0 auto;
+      padding-left: 2px;
+      border-left: 1px solid rgba(229, 231, 235, 0.9);
+      margin-left: 2px;
+    }
+
+    .playerDock .speedSelect {
+      height: 38px;
+      border-radius: 14px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 0 10px;
+      line-height: 38px;
+      min-width: 76px;
+      max-width: 110px;
+    }
+
+    /* iOS: make select feel tighter */
+    .playerDock .speedSelect:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
+      border-color: rgba(79, 70, 229, 0.6);
+    }
+
+    @media (min-width: 520px) {
+      .dockRow {
+        justify-content: center;
+      }
+    }
+
+    .hide {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="wrap">
+      <div class="title">Markdown 読み上げ（スマホ最適 / 目次 / 速度ドロップダウン / 続きから）</div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="stack">
+
+      <div class="card stack">
+        <div class="row">
+          <div style="flex:1; min-width: 220px;">
+            <label>Markdownファイル（.md）</label>
+            <input id="file" type="file" accept=".md,text/markdown,text/plain" style="width:100%;" />
+            <div id="fname" class="muted" style="margin-top:6px;"></div>
+          </div>
+
+          <div style="flex:1; min-width: 220px;">
+            <label>音声（Voice）</label>
+            <select id="voice"></select>
+          </div>
+        </div>
+        <div class="row">
+          <button id="loadVoicesBtn" class="ghost" type="button">🔄 音声を読み込む</button>
+          <span class="muted">※ファイルから開く場合、最初は空のことがあります</span>
+        </div>
+
+        <div class="row">
+          <div style="flex:1; min-width: 220px;">
+            <label>目次（見出しから自動生成）</label>
+            <select id="toc">
+              <option value="">（プレビュー反映後に選べます）</option>
+            </select>
+            <div class="muted">選択すると、その章の先頭から読み上げ開始します。</div>
+          </div>
+          <div style="flex:1; min-width: 220px;">
+            <label>先頭に付ける文（任意）</label>
+            <input id="prefix" type="text" placeholder="例：第1章 など" style="width:100%;" />
+          </div>
+        </div>
+
+        <div class="toggleRow">
+          <label class="toggle"><input type="checkbox" id="autoScroll" checked />自動スクロール</label>
+          <label class="toggle"><input type="checkbox" id="playByBlock" />コードブロックごと再生</label>
+        </div>
+
+        <div class="row" style="justify-content: space-between;">
+          <span id="status" class="pill">未読み込み</span>
+          <span id="now" class="muted"></span>
+        </div>
+
+        <div class="progress">
+          <div id="bar" class="bar"></div>
+        </div>
+
+        <div class="muted" id="resumeInfo" style="margin-top:8px;"></div>
+
+        <details>
+          <summary>Markdown原文（折りたたみ）</summary>
+          <textarea id="md" placeholder="Markdownを貼り付けるか、上のファイル選択で読み込み"></textarea>
+        </details>
+      </div>
+
+      <div class="card stack">
+        <div class="row" style="justify-content: space-between;">
+          <div class="muted">プレビュー（ブロックをタップするとそこから再生）</div>
+          <span class="pill" id="blockInfo">0 blocks</span>
+        </div>
+        <div class="preview" id="preview"></div>
+        <div class="muted">ヒント：見出しや段落をタップ → その位置から読み上げします。</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Player dock: compact one-line (fixed bottom) -->
+  <div class="playerDock" id="playerDock" aria-label="player controls">
+    <div class="playerDockInner">
+      <div class="dockRow" id="dockRow">
+        <!-- Main controls (icons only to save space on mobile) -->
+        <button id="render" class="iconBtn" type="button" title="プレビュー反映" aria-label="プレビュー反映">🔄</button>
+        <button id="play" class="iconBtn primary" type="button" title="最初から" aria-label="最初から">⏮</button>
+        <button id="resume" class="iconBtn primary" type="button" title="続きから" aria-label="続きから">▶️</button>
+        <button id="nextBlock" class="iconBtn primary" type="button" title="次のブロック" aria-label="次のブロック">⏭</button>
+        <button id="pause" class="iconBtn" type="button" title="一時停止" aria-label="一時停止">⏸</button>
+        <button id="stop" class="iconBtn" type="button" title="停止" aria-label="停止">⏹</button>
+
+        <!-- Speed buttons (same row, horizontally scrollable if needed) -->
+        <div class="dockSpeed" aria-label="speed">
+          <select id="speedSelect" class="speedSelect" title="読み上げ速度" aria-label="読み上げ速度"></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Block navigator (bottom sheet) -->
+  <div class="sheetBackdrop" id="blockSheetBackdrop" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-modal="true" aria-label="ブロック一覧">
+      <div class="sheetTop">
+        <div class="sheetTitle">ブロック一覧（タップで移動）</div>
+        <button id="closeBlockSheet" class="miniBtn" type="button">閉じる</button>
+      </div>
+      <div class="sheetBody">
+        <div class="row" style="gap:10px;">
+          <input id="blockSearch" type="text" placeholder="検索（見出し/本文）" style="flex:1;" />
+          <button id="jumpCurrent" class="miniBtn primaryMini" type="button">現在へ</button>
+        </div>
+        <div class="sheetList" id="blockList"></div>
+        <div class="muted">ヒント：小さい画面では、ここから確実に移動できます。</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const el = (id) => document.getElementById(id);
+
+      const fileEl = el("file");
+      const fnameEl = el("fname");
+      const voiceEl = el("voice");
+      const tocEl = el("toc");
+      const prefixEl = el("prefix");
+      const autoScrollEl = el("autoScroll");
+      const playByBlockEl = el("playByBlock");
+
+      const mdEl = el("md");
+      const previewEl = el("preview");
+      const blockInfoEl = el("blockInfo");
+
+      const renderBtn = el("render");
+      const playBtn = el("play");
+      const resumeBtn = el("resume");
+      const nextBlockBtn = el("nextBlock");
+      const pauseBtn = el("pause");
+      const stopBtn = el("stop");
+
+      const statusEl = el("status");
+      const nowEl = el("now");
+      const barEl = el("bar");
+      const speedSelectEl = el("speedSelect");
+      const resumeInfoEl = el("resumeInfo");
+      const loadVoicesBtn = el("loadVoicesBtn");
+
+      // Block navigator (small screens)
+      const blockSheetBackdrop = el("blockSheetBackdrop");
+      const closeBlockSheetBtn = el("closeBlockSheet");
+      const blockSearchEl = el("blockSearch");
+      const blockListEl = el("blockList");
+      const jumpCurrentBtn = el("jumpCurrent");
+
+      let previewHeaderPosEl = null;
+      let previewNavPrevBtn = null;
+      let previewNavNextBtn = null;
+      let previewNavCenterBtn = null;
+      let previewNavListBtn = null;
+
+      // Preview内のstickyヘッダー（高さを考慮してスクロール位置を補正するため）
+      let previewHeaderEl = null;
+
+      function getPreviewHeaderHeight() {
+        try {
+          const h = previewHeaderEl?.offsetHeight || previewEl.querySelector(".previewHeader")?.offsetHeight || 0;
+          return Number.isFinite(h) ? h : 0;
+        } catch {
+          return 0;
+        }
+      }
+
+      function updatePreviewScrollPadding() {
+        const h = getPreviewHeaderHeight();
+        // ネイティブのスクロール位置補正（scrollIntoView等）
+        previewEl.style.scrollPaddingTop = `${h + 12}px`;
+        // ブロックのscroll-margin-topを動的に（stickyヘッダーに被らないように）
+        previewEl.style.setProperty("--previewScrollMarginTop", `${h + 12}px`);
+      }
+
+
+      // ====== 状態保存（localStorage） ======
+      // docKey は「ファイル名 + 内容の先頭」ベースで作る（簡易・高速・オフライン向け）
+      // もっと厳密にしたい場合はSHA-256等にもできます（必要なら後で改良）
+      const APP_KEY = "md_tts_reader_v1";
+      let currentDocKey = ""; // 資料ごとのキー
+
+      function makeDocKey(filename, mdText) {
+        const head = (mdText || "").slice(0, 500);
+        const name = filename || "pasted";
+        return `${APP_KEY}::${name}::${head.length}:${head}`;
+      }
+
+      function loadSaved() {
+        if (!currentDocKey) return null;
+        try {
+          const raw = localStorage.getItem(currentDocKey);
+          return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+      }
+
+      function saveState(partial) {
+        if (!currentDocKey) return;
+        const base = loadSaved() || {};
+        const next = {
+          ...base,
+          ...partial,
+          updatedAt: Date.now()
+        };
+        try {
+          localStorage.setItem(currentDocKey, JSON.stringify(next));
+          updateResumeInfo(next);
+        } catch { }
+      }
+
+      function formatTime(ts) {
+        try {
+          const d = new Date(ts);
+          return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+        } catch { return ""; }
+      }
+
+      function updateResumeInfo(st) {
+        if (!st || typeof st.qIndex !== "number") {
+          resumeInfoEl.textContent = "";
+          resumeBtn.disabled = true;
+          return;
+        }
+        resumeBtn.disabled = false;
+        const when = st.updatedAt ? `（保存: ${formatTime(st.updatedAt)}）` : "";
+        const rate = st.selectedRate ? `${st.selectedRate}x` : "";
+        resumeInfoEl.textContent = `続き情報: ${st.qIndex + 1} / ${st.queueLen || "?"} ${rate} ${when}`;
+      }
+
+      function captureUIState() {
+        return {
+          voiceName: voiceEl.value || "",
+          selectedRate,
+          autoScroll: !!autoScrollEl.checked,
+          playByBlock: !!playByBlockEl.checked,
+          prefix: prefixEl.value || "",
+          tocValue: tocEl.value || ""
+        };
+      }
+
+      function restoreUIState(st) {
+        if (!st) return;
+        if (typeof st.autoScroll === "boolean") autoScrollEl.checked = st.autoScroll;
+        if (typeof st.playByBlock === "boolean") playByBlockEl.checked = st.playByBlock;
+        if (typeof st.prefix === "string") prefixEl.value = st.prefix;
+        if (typeof st.selectedRate === "number") {
+          selectedRate = st.selectedRate;
+          updateSpeedSelectUI();
+        }
+        // voiceは onvoiceschanged で揃うまで待つ必要があるので、後で反映する
+      }
+
+      function tryRestoreVoice(st) {
+        if (!st || !st.voiceName) return;
+        const opts = [...voiceEl.options].map(o => o.value);
+        if (opts.includes(st.voiceName)) voiceEl.value = st.voiceName;
+      }
+
+      // ===== speeds (dropdown) =====
+      const SPEEDS = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4];
+      let selectedRate = 1;
+
+      function buildSpeedSelect() {
+        if (!speedSelectEl) return;
+        speedSelectEl.innerHTML = "";
+        for (const v of SPEEDS) {
+          const opt = document.createElement("option");
+          opt.value = String(v);
+          opt.textContent = `${v}x`;
+          speedSelectEl.appendChild(opt);
+        }
+        updateSpeedSelectUI();
+      }
+
+      function updateSpeedSelectUI() {
+        if (!speedSelectEl) return;
+        speedSelectEl.value = String(selectedRate);
+      }
+
+      speedSelectEl?.addEventListener("change", () => {
+        const v = parseFloat(speedSelectEl.value);
+        selectedRate = Number.isFinite(v) ? v : 1;
+        updateSpeedSelectUI();
+        setStatus(`速度を ${selectedRate}x に設定`);
+        saveState({ selectedRate });
+      });
+
+      buildSpeedSelect();
+
+      // ===== Voice =====
+      function loadVoices() {
+        const voices = speechSynthesis.getVoices() || [];
+        voiceEl.innerHTML = "";
+        const ja = voices.filter(v => (v.lang || "").toLowerCase().startsWith("ja"));
+        const others = voices.filter(v => !((v.lang || "").toLowerCase().startsWith("ja")));
+        const ordered = [...ja, ...others];
+        for (const v of ordered) {
+          const opt = document.createElement("option");
+          opt.value = v.name;
+          opt.textContent = `${v.name} (${v.lang})`;
+          voiceEl.appendChild(opt);
+        }
+        if (ja.length) voiceEl.value = ja[0].name;
+
+        // ここで保存された voiceName を復元
+        const st = loadSaved();
+        tryRestoreVoice(st);
+      }
+      function forceLoadVoices() {
+        // “無音”を1文字だけ喋らせると voices が有効化されることがある（iOS対策）
+        try {
+          speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(" ");
+          u.volume = 0; // 無音
+          u.onend = () => {
+            u.volume = 1;
+            loadVoices();
+            setStatus("音声を読み込みました");
+          };
+          speechSynthesis.speak(u);
+        } catch {
+          loadVoices();
+        }
+      }
+
+      loadVoicesBtn.addEventListener("click", () => {
+        forceLoadVoices();
+      });
+      speechSynthesis.onvoiceschanged = loadVoices;
+      loadVoices();
+
+      voiceEl.addEventListener("change", () => {
+        saveState({ voiceName: voiceEl.value || "" });
+      });
+
+      // ===== Block sheet events =====
+      closeBlockSheetBtn?.addEventListener("click", closeBlockSheet);
+      blockSheetBackdrop?.addEventListener("click", (e) => {
+        // backdrop click closes (but keep clicks inside sheet)
+        if (e.target === blockSheetBackdrop) closeBlockSheet();
+      });
+      blockSearchEl?.addEventListener("input", () => buildBlockSheetList());
+      jumpCurrentBtn?.addEventListener("click", () => {
+        closeBlockSheet();
+        jumpToBlock(selectedBlockIndex, true);
+      });
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && blockSheetBackdrop?.classList.contains("show")) {
+          closeBlockSheet();
+        }
+      });
+
+      function getSelectedVoice() {
+        const name = voiceEl.value;
+        const voices = speechSynthesis.getVoices() || [];
+        return voices.find(v => v.name === name) || null;
+      }
+
+      // ===== Markdown parsing / preview =====
+      function escapeHtml(s) {
+        return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+      }
+
+      function inlineToHtml(s) {
+        let t = escapeHtml(s);
+        t = t.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+        t = t.replace(/!\[[^\]]*?\]\([^)]+\)/g, "");
+        t = t.replace(/`([^`]+)`/g, "<code>$1</code>");
+        t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+        t = t.replace(/__([^_]+)__/g, "<strong>$1</strong>");
+        return t;
+      }
+
+      function stripInlineForSpeech(s) {
+        s = s.replace(/!\[[^\]]*?\]\([^)]+\)/g, "");
+        s = s.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+        s = s.replace(/`[^`]*`/g, "");
+        s = s.replace(/\*\*([^*]+)\*\*/g, "$1");
+        s = s.replace(/__([^_]+)__/g, "$1");
+        s = s.replace(/\*([^*]+)\*/g, "$1");
+        s = s.replace(/_([^_]+)_/g, "$1");
+        return s.trim();
+      }
+
+      function parseInlineSegments(raw) {
+        const segments = [];
+        let s = raw;
+        s = s.replace(/!\[[^\]]*?\]\([^)]+\)/g, "");
+        s = s.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+        s = s.replace(/`[^`]*`/g, "");
+
+        const re = /\*\*([^*]+)\*\*|__([^_]+)__/g;
+        let last = 0;
+        let m;
+        while ((m = re.exec(s)) !== null) {
+          const start = m.index;
+          const end = re.lastIndex;
+          if (start > last) {
+            const normal = s.slice(last, start).trim();
+            if (normal) segments.push({ text: normal, emphasis: "normal" });
+          }
+          const boldText = (m[1] ?? m[2] ?? "").trim();
+          if (boldText) segments.push({ text: boldText, emphasis: "bold" });
+          last = end;
+        }
+        const rest = s.slice(last).trim();
+        if (rest) segments.push({ text: rest, emphasis: "normal" });
+        return segments.filter(x => x.text && x.text.trim());
+      }
+
+      function mdToBlocks(md) {
+        const lines = (md || "").replace(/\r\n/g, "\n").split("\n");
+        const blocks = [];
+        let i = 0;
+
+        const pushParagraph = (buf) => {
+          const text = buf.join(" ").replace(/\s+/g, " ").trim();
+          if (!text) return;
+          blocks.push({ type: "p", raw: text });
+        };
+
+        const pushList = (items, ordered) => {
+          if (!items.length) return;
+          blocks.push({ type: ordered ? "ol" : "ul", items: items.slice() });
+        };
+
+        while (i < lines.length) {
+          const line = lines[i];
+
+          if (/^\s*```/.test(line)) {
+            const lang = line.trim().slice(3).trim();
+            i++;
+            const code = [];
+            while (i < lines.length && !/^\s*```/.test(lines[i])) {
+              code.push(lines[i]); i++;
+            }
+            if (i < lines.length && /^\s*```/.test(lines[i])) i++;
+            blocks.push({ type: "code", lang, code: code.join("\n") });
+            continue;
+          }
+
+          if (/^\s*$/.test(line)) { i++; continue; }
+
+          const hm = line.match(/^\s*(#{1,6})\s+(.*)$/);
+          if (hm) {
+            blocks.push({ type: "h", level: hm[1].length, raw: hm[2].trim() });
+            i++;
+            continue;
+          }
+
+          if (/^\s*[-*+]\s+/.test(line)) {
+            const items = [];
+            while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i])) {
+              items.push(lines[i].replace(/^\s*[-*+]\s+/, "").trim());
+              i++;
+            }
+            pushList(items, false);
+            continue;
+          }
+
+          if (/^\s*\d+\.\s+/.test(line)) {
+            const items = [];
+            while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
+              items.push(lines[i].replace(/^\s*\d+\.\s+/, "").trim());
+              i++;
+            }
+            pushList(items, true);
+            continue;
+          }
+
+          if (/^\s*>\s?/.test(line)) {
+            const buf = [];
+            while (i < lines.length && /^\s*>\s?/.test(lines[i])) {
+              buf.push(lines[i].replace(/^\s*>\s?/, "").trim());
+              i++;
+            }
+            pushParagraph(buf);
+            continue;
+          }
+
+          if (/^\s*[-*_]{3,}\s*$/.test(line)) { i++; continue; }
+
+          const buf = [];
+          while (i < lines.length) {
+            const l = lines[i];
+            if (/^\s*$/.test(l)) break;
+            if (/^\s*```/.test(l)) break;
+            if (/^\s*(#{1,6})\s+/.test(l)) break;
+            if (/^\s*[-*+]\s+/.test(l)) break;
+            if (/^\s*\d+\.\s+/.test(l)) break;
+            buf.push(l.trim());
+            i++;
+          }
+          pushParagraph(buf);
+        }
+        return blocks;
+      }
+
+      function buildPreview(blocks) {
+        const frag = document.createDocumentFragment();
+
+        // Sticky header inside preview (for easy navigation on small screens)
+        const header = document.createElement("div");
+        header.className = "previewHeader";
+        previewHeaderEl = header;
+        header.innerHTML = `
+          <div class="previewHeaderLeft">
+            <button class="miniBtn" type="button" data-act="prev">⬆ </button>
+            <button class="miniBtn" type="button" data-act="next">⬇ </button>
+            <button class="miniBtn primaryMini" type="button" data-act="center">🎯</button>
+            <button class="miniBtn" type="button" data-act="list">☰ </button>
+          </div>
+          <div class="previewHeaderRight">
+            <span class="kbd" id="previewPos">0/0</span>
+          </div>
+        `;
+        frag.appendChild(header);
+
+        // cache header elements
+        previewHeaderPosEl = header.querySelector("#previewPos");
+        previewNavPrevBtn = header.querySelector('[data-act="prev"]');
+        previewNavNextBtn = header.querySelector('[data-act="next"]');
+        previewNavCenterBtn = header.querySelector('[data-act="center"]');
+        previewNavListBtn = header.querySelector('[data-act="list"]');
+
+        // bind once (rebuilt per render; keep simple)
+        previewNavPrevBtn.addEventListener("click", () => jumpRelative(-1));
+        previewNavNextBtn.addEventListener("click", () => jumpRelative(1));
+        previewNavCenterBtn.addEventListener("click", () => jumpToBlock(selectedBlockIndex, true));
+        previewNavListBtn.addEventListener("click", () => openBlockSheet());
+
+        blocks.forEach((b, idx) => {
+          const wrap = document.createElement("div");
+          wrap.className = "block";
+          wrap.dataset.b = String(idx);
+
+          // ブロックタップ：
+          // - ブロックごと再生ON → 下のイベント委譲で再生（ここでは選択だけ）
+          // - OFF → その位置から連続再生（旧仕様）
+          wrap.addEventListener("click", (ev) => {
+            const byBlock = !!playByBlockEl.checked;
+            // ブロックごと再生ONのときは、下のイベント委譲に任せる（伝播させる）
+            if (!byBlock) {
+              ev.preventDefault();
+              ev.stopPropagation();
+            }
+
+            selectedBlockIndex = idx;
+            saveState({ ...captureUIState(), selectedBlockIndex });
+            updateNextBlockUI();
+            updatePreviewHeader();
+
+            highlightBlock(idx, true);
+            if (byBlock) return;
+
+            // 連続モード：そのブロック位置から
+            if (!blocks.length) return;
+            queue = buildQueue(blocks);
+            const start = queue.findIndex(q => q.blockIndex === idx);
+            if (start >= 0) {
+              speechSynthesis.cancel();
+              qIndex = start;
+              isPlaying = true;
+              isBlockSession = false;
+              saveState({ ...captureUIState(), qIndex, queueLen: queue.length, selectedBlockIndex });
+              speakNext();
+            }
+          });
+
+          if (b.type === "h") {
+            const h = document.createElement("h3");
+            h.className = b.level <= 1 ? "h1" : (b.level === 2 ? "h2" : "h3");
+            h.innerHTML = inlineToHtml(b.raw);
+            wrap.appendChild(h);
+          } else if (b.type === "p") {
+            const p = document.createElement("p");
+            p.className = "p";
+            p.innerHTML = inlineToHtml(b.raw);
+            wrap.appendChild(p);
+          } else if (b.type === "ul" || b.type === "ol") {
+            const list = document.createElement(b.type);
+            list.className = b.type;
+            b.items.forEach(item => {
+              const li = document.createElement("li");
+              li.innerHTML = inlineToHtml(item);
+              list.appendChild(li);
+            });
+            wrap.appendChild(list);
+          } else if (b.type === "code") {
+            const pre = document.createElement("div");
+            pre.className = "code";
+            pre.textContent = b.code;
+            wrap.appendChild(pre);
+          }
+
+          frag.appendChild(wrap);
+        });
+        previewEl.innerHTML = "";
+        previewEl.appendChild(frag);
+        blockInfoEl.textContent = `${blocks.length} blocks`;
+
+        // stickyヘッダー高さを反映して、ブロックがヘッダーに被らないようにする
+        requestAnimationFrame(() => updatePreviewScrollPadding());
+
+        updatePreviewHeader();
+      }
+
+      // ===== TOC =====
+      function buildTOC(blocks) {
+        const toc = [];
+        blocks.forEach((b, idx) => {
+          if (b.type === "h") {
+            const title = stripInlineForSpeech(b.raw);
+            if (!title) return;
+            toc.push({ idx, level: b.level, title });
+          }
+        });
+        return toc;
+      }
+
+      function renderTOC(toc) {
+        tocEl.innerHTML = "";
+        if (!toc.length) {
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "（見出しが見つかりません）";
+          tocEl.appendChild(opt);
+          return;
+        }
+        const opt0 = document.createElement("option");
+        opt0.value = "";
+        opt0.textContent = "目次を選択…";
+        tocEl.appendChild(opt0);
+
+        toc.forEach(item => {
+          const opt = document.createElement("option");
+          opt.value = String(item.idx);
+          const indent = item.level >= 2 ? "　".repeat(Math.min(6, item.level - 1)) : "";
+          opt.textContent = `${indent}${item.title}`;
+          tocEl.appendChild(opt);
+        });
+      }
+
+      function scrollToBlock(blockIndex) {
+        const target = previewEl.querySelector(`.block[data-b="${blockIndex}"]`);
+        if (!target) return;
+        const pr = previewEl.getBoundingClientRect();
+        const tr = target.getBoundingClientRect();
+        const headerH = getPreviewHeaderHeight();
+        // stickyヘッダーに被らない位置まで上に寄せる
+        previewEl.scrollTop += (tr.top - pr.top) - headerH - 12;
+      }
+
+      // ===== Preview navigation (small screen friendly) =====
+      function updatePreviewHeader() {
+        if (!previewHeaderPosEl) return;
+        const total = blocks.length || 0;
+        const cur = total ? Math.min(total, Math.max(1, selectedBlockIndex + 1)) : 0;
+        previewHeaderPosEl.textContent = `${cur}/${total}`;
+
+        if (previewNavPrevBtn) previewNavPrevBtn.disabled = (selectedBlockIndex <= 0);
+        if (previewNavNextBtn) previewNavNextBtn.disabled = (selectedBlockIndex >= total - 1);
+      }
+
+      function jumpToBlock(idx, center) {
+        if (!blocks.length) return;
+        const next = Math.max(0, Math.min(blocks.length - 1, idx));
+        selectedBlockIndex = next;
+        saveState({ ...captureUIState(), selectedBlockIndex });
+        updateNextBlockUI();
+        highlightBlock(next, true);
+        if (center) scrollToBlock(next);
+        updatePreviewHeader();
+      }
+
+      function jumpRelative(delta) {
+        jumpToBlock((selectedBlockIndex || 0) + delta, true);
+      }
+
+      function openBlockSheet() {
+        if (!blockSheetBackdrop) return;
+        blockSheetBackdrop.classList.add("show");
+        blockSheetBackdrop.setAttribute("aria-hidden", "false");
+        buildBlockSheetList();
+        setTimeout(() => { try { blockSearchEl?.focus(); } catch { } }, 0);
+      }
+
+      function closeBlockSheet() {
+        if (!blockSheetBackdrop) return;
+        blockSheetBackdrop.classList.remove("show");
+        blockSheetBackdrop.setAttribute("aria-hidden", "true");
+      }
+
+      function blockLabelFor(idx) {
+        const b = blocks[idx];
+        if (!b) return "";
+        if (b.type === "h") {
+          const title = stripInlineForSpeech(b.raw || "");
+          return `見出し${b.level}: ${title}`.trim();
+        }
+        if (b.type === "p") return stripInlineForSpeech(b.raw || "");
+        if (b.type === "ul" || b.type === "ol") {
+          const t = (b.items || []).map(x => stripInlineForSpeech(x)).filter(Boolean).join(" / ");
+          return t;
+        }
+        if (b.type === "code") {
+          const t = (b.code || "").trim();
+          return t ? `コード: ${t.slice(0, 120)}` : "コード";
+        }
+        return "";
+      }
+
+      function buildBlockSheetList() {
+        if (!blockListEl) return;
+        const q = (blockSearchEl?.value || "").trim().toLowerCase();
+        blockListEl.innerHTML = "";
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < blocks.length; i++) {
+          const text = blockLabelFor(i);
+          if (q && !text.toLowerCase().includes(q) && !String(i + 1).includes(q)) continue;
+
+          const item = document.createElement("div");
+          item.className = "sheetItem" + (i === selectedBlockIndex ? " active" : "");
+          item.tabIndex = 0;
+
+          const title = document.createElement("div");
+          title.className = "sheetItemTitle";
+          title.textContent = `#${String(i + 1).padStart(3, "0")}`;
+
+          const sub = document.createElement("div");
+          sub.className = "sheetItemSub";
+          sub.textContent = text || "（空）";
+
+          item.appendChild(title);
+          item.appendChild(sub);
+
+          item.addEventListener("click", () => {
+            closeBlockSheet();
+            jumpToBlock(i, true);
+          });
+          item.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              closeBlockSheet();
+              jumpToBlock(i, true);
+            }
+          });
+          frag.appendChild(item);
+        }
+        blockListEl.appendChild(frag);
+      }
+
+      // ===== Queue / Speech =====
+      let blocks = [];
+      let toc = [];
+      let queue = [];
+      let qIndex = 0;
+      let isPlaying = false;
+      let selectedBlockIndex = 0;
+      let isBlockSession = false;
+
+      function setStatus(s) { statusEl.textContent = s; }
+      function setNow(s) { nowEl.textContent = s ? `いま：${s}` : ""; }
+      function setProgress(i, total) {
+        if (!total) { barEl.style.width = "0%"; return; }
+        const pct = Math.min(100, Math.max(0, (i / total) * 100));
+        barEl.style.width = pct.toFixed(1) + "%";
+      }
+
+      function highlightBlock(blockIndex, doScroll) {
+        previewEl.querySelectorAll(".block.active").forEach(n => n.classList.remove("active"));
+        if (blockIndex < 0) return;
+        const target = previewEl.querySelector(`.block[data-b="${blockIndex}"]`);
+        if (!target) return;
+        target.classList.add("active");
+
+        if (doScroll && autoScrollEl.checked) {
+          const pr = previewEl.getBoundingClientRect();
+          const tr = target.getBoundingClientRect();
+          const headerH = getPreviewHeaderHeight();
+          const deltaTop = (tr.top - pr.top) - headerH; // 見える上端（stickyヘッダー下）基準
+          const deltaBottom = tr.bottom - pr.bottom;
+          if (deltaTop < 20) previewEl.scrollTop += (deltaTop - 20);
+          else if (deltaBottom > -20) previewEl.scrollTop += (deltaBottom + 20);
+        }
+      }
+
+      function toBlockSpeechText(b) {
+        if (!b) return "";
+        if (b.type === "h") return stripInlineForSpeech(b.raw || "");
+        if (b.type === "p") return stripInlineForSpeech(b.raw || "");
+        if (b.type === "ul" || b.type === "ol") {
+          const items = (b.items || []).map(x => stripInlineForSpeech(x)).filter(Boolean);
+          return items.join("。 ");
+        }
+        if (b.type === "code") {
+          const txt = (b.code || "").trim();
+          // コードは「読める範囲」で。必要なら後で読み方ルールを追加できます。
+          return txt;
+        }
+        return "";
+      }
+
+      function buildQueue(blocks) {
+        const q = [];
+        const prefix = (prefixEl.value || "").trim();
+        if (prefix) q.push({ blockIndex: -1, text: prefix, emphasis: "heading", kind: "prefix" });
+
+        for (let i = 0; i < blocks.length; i++) {
+          const b = blocks[i];
+
+          // 連続再生モードは「コードブロックは読まない」(旧仕様互換)
+          if (b.type === "code" && !playByBlockEl.checked) continue;
+
+          if (b.type === "h") {
+            const txt = stripInlineForSpeech(b.raw);
+            if (txt) q.push({ blockIndex: i, text: txt, emphasis: "heading", kind: "heading" });
+            continue;
+          }
+
+          if (b.type === "p") {
+            const segs = parseInlineSegments(b.raw).map(s => ({
+              blockIndex: i, text: stripInlineForSpeech(s.text), emphasis: s.emphasis, kind: "p"
+            })).filter(x => x.text);
+            if (segs.length) q.push(...segs);
+            else {
+              const txt = stripInlineForSpeech(b.raw);
+              if (txt) q.push({ blockIndex: i, text: txt, emphasis: "normal", kind: "p" });
+            }
+            continue;
+          }
+
+          if (b.type === "ul" || b.type === "ol") {
+            for (const item of b.items) {
+              const segs = parseInlineSegments(item).map(s => ({
+                blockIndex: i, text: stripInlineForSpeech(s.text), emphasis: s.emphasis, kind: "list"
+              })).filter(x => x.text);
+              if (segs.length) q.push(...segs);
+              else {
+                const txt = stripInlineForSpeech(item);
+                if (txt) q.push({ blockIndex: i, text: txt, emphasis: "normal", kind: "list" });
+              }
+            }
+            continue;
+          }
+
+          if (b.type === "code") {
+            const txt = (b.code || "").trim();
+            if (txt) q.push({ blockIndex: i, text: txt, emphasis: "normal", kind: "code" });
+          }
+        }
+        return q;
+      }
+
+      function buildSingleBlockQueue(blockIndex) {
+        const q = [];
+        const prefix = (prefixEl.value || "").trim();
+        if (prefix) q.push({ blockIndex: -1, text: prefix, emphasis: "heading", kind: "prefix" });
+        const b = blocks[blockIndex];
+        const txt = toBlockSpeechText(b);
+        if (txt) {
+          const emphasis = (b && b.type === "h") ? "heading" : "normal";
+          q.push({ blockIndex, text: txt, emphasis, kind: "block" });
+        }
+        return q;
+      }
+
+      function speakNext() {
+        if (!isPlaying) return;
+
+        if (qIndex >= queue.length) {
+          isPlaying = false;
+          setStatus(isBlockSession ? "ブロック完了" : "完了");
+          setNow("");
+          setProgress(queue.length, queue.length);
+          // ブロックごと再生中はハイライトを残す
+          if (!isBlockSession) highlightBlock(-1, false);
+          // 完了時は「最後まで行った」状態を保存
+          saveState({ ...captureUIState(), qIndex: queue.length, queueLen: queue.length });
+          return;
+        }
+
+        const item = queue[qIndex];
+        const utter = new SpeechSynthesisUtterance(item.text);
+        const v = getSelectedVoice();
+        if (v) utter.voice = v;
+
+        utter.rate = selectedRate;
+        utter.pitch = 1.0;
+
+        if (item.emphasis === "heading") {
+          utter.pitch = 1.22;
+          utter.rate = Math.max(0.5, selectedRate * 0.92);
+        } else if (item.emphasis === "bold") {
+          utter.pitch = 1.12;
+        }
+
+        utter.onstart = () => {
+          setStatus("再生中");
+          setProgress(qIndex, queue.length);
+          highlightBlock(item.blockIndex, true);
+
+          const shown = item.text.length > 34 ? item.text.slice(0, 34) + "…" : item.text;
+          setNow(shown);
+
+          // 再生開始タイミングで「現在地」を保存（突然落ちても復帰しやすい）
+          saveState({ ...captureUIState(), qIndex, queueLen: queue.length });
+        };
+
+        utter.onend = () => {
+          qIndex += 1;
+          setProgress(qIndex, queue.length);
+          // 次に進む前にも保存（精度UP）
+          saveState({ ...captureUIState(), qIndex, queueLen: queue.length });
+          speakNext();
+        };
+
+        utter.onerror = (e) => {
+          console.error(e);
+          isPlaying = false;
+          setStatus("エラー（音声エンジン）");
+          saveState({ ...captureUIState(), qIndex, queueLen: queue.length });
+        };
+
+        speechSynthesis.speak(utter);
+      }
+
+      function stopAll() {
+        isPlaying = false;
+        isBlockSession = false;
+        speechSynthesis.cancel();
+        setStatus("停止");
+        setNow("");
+        // 停止時点の位置を保存
+        saveState({ ...captureUIState(), qIndex, queueLen: queue.length, selectedBlockIndex });
+      }
+
+      // ===== 共通：ドキュメントキー確定＆保存状態復元 =====
+      function setDocContext(filename) {
+        currentDocKey = makeDocKey(filename || "", mdEl.value || "");
+        const st = loadSaved();
+        restoreUIState(st);
+        if (st && typeof st.selectedBlockIndex === "number") selectedBlockIndex = st.selectedBlockIndex;
+        updateResumeInfo(st);
+        // voiceは voices 反映後に揃うことがあるので一応ここでも試す
+        tryRestoreVoice(st);
+        updateNextBlockUI();
+      }
+
+      function updateDockHeightVar() {
+        const dock = el("playerDock");
+        if (!dock) return;
+        const h = dock.getBoundingClientRect().height;
+        document.documentElement.style.setProperty("--dockH", `${Math.ceil(h)}px`);
+      }
+
+      function updateNextBlockUI() {
+        if (!nextBlockBtn) return;
+        const byBlock = !!playByBlockEl.checked;
+        nextBlockBtn.classList.toggle("hide", !byBlock);
+        if (!byBlock) return;
+        const hasNext = blocks.length ? (selectedBlockIndex + 1 < blocks.length) : true;
+        nextBlockBtn.disabled = !hasNext;
+      }
+
+      window.addEventListener("resize", () => {
+        updateDockHeightVar();
+        updatePreviewScrollPadding();
+      });
+
+      // ===== Actions =====
+      renderBtn.addEventListener("click", () => {
+        // docKey 更新（ファイル名があれば fnameEl を使う）
+        setDocContext((fnameEl.textContent || "").trim());
+
+        blocks = mdToBlocks(mdEl.value || "");
+        queue = buildQueue(blocks);
+
+        buildPreview(blocks);
+        toc = buildTOC(blocks);
+        renderTOC(toc);
+        updateNextBlockUI();
+        updateDockHeightVar();
+
+        // 保存されている位置があれば復元表示
+        const st = loadSaved();
+        if (st && typeof st.qIndex === "number" && st.qIndex >= 0 && st.qIndex <= queue.length) {
+          qIndex = st.qIndex;
+          setStatus("プレビュー反映＆続き情報あり");
+          setProgress(qIndex, queue.length);
+          // その地点のブロックへハイライト（可能なら）
+          const bi = queue[qIndex]?.blockIndex;
+          if (typeof bi === "number") {
+            highlightBlock(bi, false);
+          }
+          saveState({ queueLen: queue.length }); // 長さ更新
+        } else {
+          qIndex = 0;
+          setStatus("プレビュー反映＆準備完了");
+          setProgress(0, queue.length);
+          saveState({ ...captureUIState(), qIndex: 0, queueLen: queue.length, selectedBlockIndex });
+        }
+      });
+
+      function ensureBlocksReady() {
+        if (blocks.length) return;
+        setDocContext((fnameEl.textContent || "").trim());
+        blocks = mdToBlocks(mdEl.value || "");
+        buildPreview(blocks);
+        toc = buildTOC(blocks);
+        renderTOC(toc);
+        updateNextBlockUI();
+      }
+
+      function playCurrentBlock() {
+        speechSynthesis.cancel();
+        ensureBlocksReady();
+
+        // 有効範囲に丸める
+        if (selectedBlockIndex < 0) selectedBlockIndex = 0;
+        if (selectedBlockIndex >= blocks.length) selectedBlockIndex = Math.max(0, blocks.length - 1);
+
+        highlightBlock(selectedBlockIndex, true);
+        scrollToBlock(selectedBlockIndex);
+
+        queue = buildSingleBlockQueue(selectedBlockIndex);
+        qIndex = 0;
+
+        if (!queue.length) {
+          setStatus("このブロックは読み上げ対象がありません");
+          return;
+        }
+
+        isPlaying = true;
+        isBlockSession = true;
+        setStatus("ブロック再生");
+        saveState({ ...captureUIState(), qIndex, queueLen: queue.length, selectedBlockIndex });
+        speakNext();
+      }
+
+      function playNextBlock() {
+        ensureBlocksReady();
+        if (selectedBlockIndex + 1 >= blocks.length) {
+          setStatus("次のブロックがありません");
+          updateNextBlockUI();
+          return;
+        }
+        selectedBlockIndex += 1;
+        saveState({ ...captureUIState(), selectedBlockIndex });
+        updateNextBlockUI();
+        playCurrentBlock();
+      }
+
+      playBtn.addEventListener("click", () => {
+        if (playByBlockEl.checked) {
+          // ブロックごと：選択ブロックの先頭から、ブロック末尾で停止
+          playCurrentBlock();
+          return;
+        }
+
+        speechSynthesis.cancel();
+        ensureBlocksReady();
+
+        queue = buildQueue(blocks);
+        qIndex = 0;
+
+        if (!queue.length) {
+          setStatus("読み上げ対象がありません");
+          return;
+        }
+
+        isPlaying = true;
+        isBlockSession = false;
+        setStatus("最初から再生");
+        saveState({ ...captureUIState(), qIndex, queueLen: queue.length, selectedBlockIndex });
+        speakNext();
+      });
+
+      resumeBtn.addEventListener("click", () => {
+        speechSynthesis.cancel();
+
+        // ブロックごと：最後に選択していたブロックを再生（先頭から）
+        if (playByBlockEl.checked) {
+          const st = loadSaved();
+          if (st && typeof st.selectedBlockIndex === "number") selectedBlockIndex = st.selectedBlockIndex;
+          playCurrentBlock();
+          return;
+        }
+
+        // 連続モード：従来の続き位置
+        ensureBlocksReady();
+        queue = buildQueue(blocks);
+        if (!queue.length) {
+          setStatus("読み上げ対象がありません");
+          return;
+        }
+
+        const st = loadSaved();
+        let start = (st && typeof st.qIndex === "number") ? st.qIndex : 0;
+        if (start < 0) start = 0;
+        if (start > queue.length) start = 0;
+
+        qIndex = start;
+
+        isPlaying = true;
+        isBlockSession = false;
+        setStatus("続きから再生");
+        saveState({ ...captureUIState(), qIndex, queueLen: queue.length, selectedBlockIndex });
+
+        const bi = queue[qIndex]?.blockIndex;
+        if (typeof bi === "number") {
+          highlightBlock(bi, true);
+          scrollToBlock(bi);
+        }
+        speakNext();
+      });
+
+      nextBlockBtn.addEventListener("click", () => {
+        if (!playByBlockEl.checked) return;
+        playNextBlock();
+      });
+
+      pauseBtn.addEventListener("click", () => {
+        if (speechSynthesis.speaking && !speechSynthesis.paused) {
+          speechSynthesis.pause();
+          setStatus("一時停止中");
+          saveState({ ...captureUIState(), qIndex, queueLen: queue.length });
+        } else if (speechSynthesis.paused) {
+          speechSynthesis.resume();
+          setStatus("再生中");
+        }
+      });
+
+      stopBtn.addEventListener("click", stopAll);
+
+      // TOC selection -> jump & play from that heading block
+      tocEl.addEventListener("change", () => {
+        const v = tocEl.value;
+        if (!v) return;
+        const blockIndex = Number(v);
+
+        selectedBlockIndex = blockIndex;
+        saveState({ ...captureUIState(), selectedBlockIndex });
+        updateNextBlockUI();
+
+        highlightBlock(blockIndex, true);
+        scrollToBlock(blockIndex);
+
+        if (playByBlockEl.checked) {
+          playCurrentBlock();
+          return;
+        }
+
+        // 連続モードは従来どおりその見出し位置から
+        if (!blocks.length) blocks = mdToBlocks(mdEl.value || "");
+        queue = buildQueue(blocks);
+        const start = queue.findIndex(q => q.blockIndex === blockIndex);
+        if (start >= 0) {
+          speechSynthesis.cancel();
+          qIndex = start;
+          isPlaying = true;
+          isBlockSession = false;
+          setStatus("目次から再生");
+          saveState({ ...captureUIState(), qIndex, queueLen: queue.length, selectedBlockIndex });
+          speakNext();
+        } else {
+          setStatus("この見出しは読み上げ対象がありません");
+        }
+      });
+
+      // file read
+      fileEl.addEventListener("change", async () => {
+        const f = fileEl.files && fileEl.files[0];
+        if (!f) return;
+        fnameEl.textContent = f.name;
+        mdEl.value = await f.text();
+
+        // docKey確定＆復元
+        setDocContext(f.name);
+
+        setStatus("読み込み済み（プレビュー反映してください）");
+      });
+
+      // re-queue on toggles
+      playByBlockEl.addEventListener("change", () => {
+        saveState({ playByBlock: !!playByBlockEl.checked, selectedBlockIndex });
+        updateNextBlockUI();
+        if (blocks.length) {
+          // モード切替時は停止＆位置のみ保持
+          stopAll();
+          setStatus("再生モードを切り替えました");
+        }
+      });
+
+      autoScrollEl.addEventListener("change", () => {
+        saveState({ autoScroll: !!autoScrollEl.checked });
+      });
+
+      prefixEl.addEventListener("input", () => {
+        // 入力頻繁なので軽く保存（必要なら debounce にできます）
+        saveState({ prefix: prefixEl.value || "" });
+      });
+
+      // プレビューのブロックをタップした時の挙動をモードで分岐
+      // (buildPreview 内で付けている click handler を差し替えるため、少し工夫)
+      // ここではイベント委譲で上書きします。
+      previewEl.addEventListener("click", (ev) => {
+        const t = ev.target.closest && ev.target.closest(".block");
+        if (!t) return;
+        const idx = Number(t.dataset.b);
+        if (!Number.isFinite(idx)) return;
+        selectedBlockIndex = idx;
+        saveState({ ...captureUIState(), selectedBlockIndex });
+        updateNextBlockUI();
+        if (playByBlockEl.checked) {
+          // ブロックごと：タップでそのブロックを再生
+          playCurrentBlock();
+        }
+      });
+
+      // iOS対策：ユーザー操作が起きるまで voices が空のことがある
+      document.addEventListener("touchstart", () => {
+        try { loadVoices(); } catch { }
+      }, { once: true });
+
+      // 初期：貼り付け運用でもdocKey作れるように（未入力なら保存しない）
+      resumeBtn.disabled = true;
+      setStatus("未読み込み");
+
+      // 初期ドック高さ計測
+      updateDockHeightVar();
+      updateNextBlockUI();
+    })();
+  </script>
+</body>
+
+</html>             
