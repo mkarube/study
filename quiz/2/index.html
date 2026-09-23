@@ -54,23 +54,12 @@
             <div>
                 <h1 class="text-2xl font-bold">一問一答トレーニング</h1>
             </div>
-            <div class="flex items-center gap-3">
-                <button id="btn-header-save" class="hidden flex items-center gap-1 bg-indigo-500 hover:bg-indigo-400 text-white text-sm py-1.5 px-3 rounded transition shadow">
-                    💾 <span class="hidden sm:inline">途中保存</span>
-                </button>
-                <button id="toggle-header-btn" class="p-2 bg-indigo-700 rounded-full hover:bg-indigo-800 transition shadow focus:outline-none" title="設定を開閉">
-                    <svg id="header-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transform transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                    </svg>
-                </button>
-            </div>
+            <button id="toggle-header-btn" class="p-2 bg-indigo-700 rounded-full hover:bg-indigo-800 transition shadow focus:outline-none" title="設定を開閉">
+                <svg id="header-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transform transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                </svg>
+            </button>
         </header>
-
-        <!-- タブメニュー (ファイル読み込み後に表示) -->
-        <div id="tab-menu" class="bg-indigo-700 flex text-white text-sm hidden">
-            <button id="tab-train" class="flex-1 py-3 font-bold bg-indigo-800 transition border-b-4 border-white">トレーニング</button>
-            <button id="tab-analytics" class="flex-1 py-3 font-bold hover:bg-indigo-600 transition border-b-4 border-transparent text-indigo-200">分析・対策</button>
-        </div>
 
         <div id="collapsible-area">
             <div class="bg-indigo-600 text-white px-6 pb-6">
@@ -121,7 +110,7 @@
         </div>
 
         <div id="quiz-area" class="p-6 hidden">
-            <div class="flex justify-between items-center mb-2">
+            <div class="flex justify-between items-center mb-4">
                 <h2 id="question-number" class="text-xl font-bold text-gray-800">問題</h2>
                 <div class="flex items-center gap-4">
                     <button id="btn-read-question" class="text-sm bg-blue-100 text-blue-700 font-semibold py-1 px-3 rounded hover:bg-blue-200 transition shadow-sm">
@@ -129,10 +118,6 @@
                     </button>
                     <span id="progress-text" class="text-sm font-medium text-gray-500"></span>
                 </div>
-            </div>
-            
-            <div id="question-stats-badge" class="mb-4 inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded border border-gray-200">
-                過去の成績: データなし
             </div>
             
             <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
@@ -162,65 +147,6 @@
                         <button id="btn-export-json" class="bg-white border border-indigo-600 text-indigo-600 font-bold py-2 px-4 rounded shadow hover:bg-indigo-50 transition hidden md:block">進捗を保存 (JSON)</button>
                         <button id="btn-next" class="bg-indigo-600 text-white font-bold py-2 px-8 rounded shadow hover:bg-indigo-700 transition">次の問題へ</button>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 分析・対策エリア -->
-        <div id="analytics-area" class="p-6 hidden bg-gray-50 min-h-[500px]">
-            <div class="mb-6 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 class="text-lg font-bold text-gray-800 mb-4">学習状況サマリー</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-center">
-                    <div class="bg-blue-50 p-3 rounded">
-                        <div class="text-sm text-blue-600 font-medium">全問題数</div>
-                        <div id="stat-total" class="text-2xl font-bold text-blue-800">-</div>
-                    </div>
-                    <div class="bg-green-50 p-3 rounded">
-                        <div class="text-sm text-green-600 font-medium">回答済み</div>
-                        <div id="stat-answered" class="text-2xl font-bold text-green-800">-</div>
-                    </div>
-                    <div class="bg-yellow-50 p-3 rounded">
-                        <div class="text-sm text-yellow-600 font-medium">未回答</div>
-                        <div id="stat-unanswered" class="text-2xl font-bold text-yellow-800">-</div>
-                    </div>
-                    <div class="bg-red-50 p-3 rounded">
-                        <div class="text-sm text-red-600 font-medium">苦手 (間違えあり)</div>
-                        <div id="stat-weak" class="text-2xl font-bold text-red-800">-</div>
-                    </div>
-                </div>
-                <div class="flex justify-center">
-                    <button id="btn-start-weak-course" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow transition flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
-                        </svg>
-                        苦手克服コースを開始する
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-gray-100 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                    <h3 class="font-bold text-gray-700">問題別成績リスト</h3>
-                    <select id="analytics-filter" class="text-sm border-gray-300 rounded shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                        <option value="all">すべて表示</option>
-                        <option value="weak">苦手な問題のみ</option>
-                        <option value="unanswered">未回答のみ</option>
-                    </select>
-                </div>
-                <div class="max-h-[600px] overflow-y-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-gray-50 sticky top-0 shadow-sm">
-                            <tr>
-                                <th class="py-2 px-4 border-b font-medium text-gray-600 text-sm w-12">No.</th>
-                                <th class="py-2 px-4 border-b font-medium text-gray-600 text-sm">問題 (冒頭)</th>
-                                <th class="py-2 px-4 border-b font-medium text-gray-600 text-sm w-32 text-center">正解率</th>
-                                <th class="py-2 px-4 border-b font-medium text-gray-600 text-sm w-24 text-center">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="analytics-tbody" class="text-sm text-gray-700 divide-y divide-gray-200">
-                            <!-- JSで生成 -->
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
@@ -305,22 +231,6 @@
         const btnNext = document.getElementById('btn-next');
         const btnCopyResult = document.getElementById('btn-copy-result');
         const btnExportJson = document.getElementById('btn-export-json');
-
-        // 新規追加DOM要素
-        const btnHeaderSave = document.getElementById('btn-header-save');
-        const tabMenu = document.getElementById('tab-menu');
-        const tabTrain = document.getElementById('tab-train');
-        const tabAnalytics = document.getElementById('tab-analytics');
-        const analyticsArea = document.getElementById('analytics-area');
-        const questionStatsBadge = document.getElementById('question-stats-badge');
-        
-        const statTotal = document.getElementById('stat-total');
-        const statAnswered = document.getElementById('stat-answered');
-        const statUnanswered = document.getElementById('stat-unanswered');
-        const statWeak = document.getElementById('stat-weak');
-        const btnStartWeakCourse = document.getElementById('btn-start-weak-course');
-        const analyticsFilter = document.getElementById('analytics-filter');
-        const analyticsTbody = document.getElementById('analytics-tbody');
 
         // メッセージボックス関数
         function showMessage(text) {
@@ -444,190 +354,8 @@
 
             document.getElementById('empty-state').classList.add('hidden');
             document.getElementById('quiz-area').classList.remove('hidden');
-            
-            showAppUI();
-            updateStats();
             showQuestion();
         }
-
-        // --- 新規機能：UI制御と集計・分析 ---
-
-        function showAppUI() {
-            tabMenu.classList.remove('hidden');
-            btnHeaderSave.classList.remove('hidden');
-        }
-
-        function switchTab(tabName) {
-            stopSpeech();
-            if (tabName === 'train') {
-                tabTrain.classList.replace('text-indigo-200', 'text-white');
-                tabTrain.classList.replace('border-transparent', 'border-white');
-                tabTrain.classList.add('bg-indigo-800');
-                
-                tabAnalytics.classList.replace('text-white', 'text-indigo-200');
-                tabAnalytics.classList.replace('border-white', 'border-transparent');
-                tabAnalytics.classList.remove('bg-indigo-800');
-
-                analyticsArea.classList.add('hidden');
-                quizArea.classList.remove('hidden');
-                collapsibleArea.classList.add('hidden'); // 学習中は設定を閉じる
-                headerIcon.classList.add('rotate-180');
-                
-            } else if (tabName === 'analytics') {
-                tabAnalytics.classList.replace('text-indigo-200', 'text-white');
-                tabAnalytics.classList.replace('border-transparent', 'border-white');
-                tabAnalytics.classList.add('bg-indigo-800');
-                
-                tabTrain.classList.replace('text-white', 'text-indigo-200');
-                tabTrain.classList.replace('border-white', 'border-transparent');
-                tabTrain.classList.remove('bg-indigo-800');
-
-                quizArea.classList.add('hidden');
-                analyticsArea.classList.remove('hidden');
-                collapsibleArea.classList.add('hidden');
-                headerIcon.classList.add('rotate-180');
-                
-                updateStats();
-                renderAnalytics();
-            }
-        }
-
-        tabTrain.addEventListener('click', () => switchTab('train'));
-        tabAnalytics.addEventListener('click', () => switchTab('analytics'));
-
-        function updateStats() {
-            if (!questions || questions.length === 0) return;
-            
-            // 初期化
-            questions.forEach(q => {
-                q.stats = { attempts: 0, corrects: 0 };
-            });
-
-            // 履歴から集計
-            resultsHistory.forEach(record => {
-                // マークダウンから読み込んだ問題文は改行が含まれる場合があるため、スペースに置換して比較
-                const qIndex = questions.findIndex(q => q.q.replace(/\n/g, ' ') === record.question);
-                if (qIndex !== -1) {
-                    questions[qIndex].stats.attempts++;
-                    if (record.isCorrect) {
-                        questions[qIndex].stats.corrects++;
-                    }
-                }
-            });
-        }
-
-        function renderAnalytics() {
-            const filter = analyticsFilter.value;
-            let answeredCount = 0;
-            let weakCount = 0;
-            
-            analyticsTbody.innerHTML = '';
-            
-            questions.forEach((q, index) => {
-                const s = q.stats;
-                const isAnswered = s.attempts > 0;
-                const isWeak = isAnswered && (s.corrects < s.attempts); // 1度でも間違えていれば苦手判定
-                
-                if (isAnswered) answeredCount++;
-                if (isWeak) weakCount++;
-
-                // フィルタリング
-                if (filter === 'weak' && !isWeak) return;
-                if (filter === 'unanswered' && isAnswered) return;
-
-                const rate = isAnswered ? Math.round((s.corrects / s.attempts) * 100) : 0;
-                let rateColorClass = 'text-gray-500';
-                if (isAnswered) {
-                    if (rate === 100) rateColorClass = 'text-green-600 font-bold';
-                    else if (rate >= 50) rateColorClass = 'text-yellow-600 font-bold';
-                    else rateColorClass = 'text-red-600 font-bold';
-                }
-
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-indigo-50 transition';
-                tr.innerHTML = `
-                    <td class="py-2 px-4 border-b">${index + 1}</td>
-                    <td class="py-2 px-4 border-b">
-                        <div class="truncate max-w-xs md:max-w-md lg:max-w-xl cursor-help" title="${q.q}">${q.q}</div>
-                    </td>
-                    <td class="py-2 px-4 border-b text-center">
-                        ${isAnswered ? `<span class="${rateColorClass}">${rate}%</span><br><span class="text-xs text-gray-500">(${s.corrects}/${s.attempts})</span>` : '<span class="text-gray-400">-</span>'}
-                    </td>
-                    <td class="py-2 px-4 border-b text-center">
-                        <button class="btn-jump-direct bg-white border border-indigo-500 text-indigo-600 hover:bg-indigo-50 text-xs py-1 px-2 rounded shadow-sm" data-index="${index}">
-                            解く
-                        </button>
-                    </td>
-                `;
-                analyticsTbody.appendChild(tr);
-            });
-
-            // サマリー更新
-            statTotal.innerText = questions.length;
-            statAnswered.innerText = answeredCount;
-            statUnanswered.innerText = questions.length - answeredCount;
-            statWeak.innerText = weakCount;
-
-            // ジャンプボタンのイベント設定
-            document.querySelectorAll('.btn-jump-direct').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const targetIndex = parseInt(e.currentTarget.getAttribute('data-index'), 10);
-                    jumpToQuestion(targetIndex);
-                });
-            });
-        }
-
-        analyticsFilter.addEventListener('change', renderAnalytics);
-
-        // 特定の問題に直接ジャンプ
-        window.jumpToQuestion = function(targetIndex) {
-            let orderIndex = questionOrder.indexOf(targetIndex);
-            
-            // 現在のコース（苦手コース等）に含まれていない場合は、全問コースにリセットする
-            if (orderIndex === -1) {
-                questionOrder = Array.from({length: questions.length}, (_, i) => i);
-                orderIndex = targetIndex;
-                
-                // ランダム出題をオフにする
-                randomToggle.checked = false;
-                randomToggle.disabled = true;
-                randomToggle.parentElement.classList.add('opacity-50');
-                
-                showMessage(`現在の出題コースに該当の問題が含まれていなかったため、「全問コース」に変更し、第 ${targetIndex + 1} 問 に移動しました。`);
-            }
-            
-            currentQuestionIndex = orderIndex;
-            switchTab('train'); // トレーニング画面へ
-            showQuestion();
-            saveState();
-        };
-
-        // 苦手克服コース開始
-        btnStartWeakCourse.addEventListener('click', () => {
-            updateStats();
-            questionOrder = [];
-            questions.forEach((q, index) => {
-                // 1度も解いていないか、1回でも間違えたことがある問題を抽出
-                if (q.stats.attempts === 0 || q.stats.corrects < q.stats.attempts) {
-                    questionOrder.push(index);
-                }
-            });
-
-            if (questionOrder.length === 0) {
-                showMessage("復習が必要な問題はありません！（すべて正解しています）\n素晴らしいです！");
-                return;
-            }
-
-            currentQuestionIndex = 0;
-            if (randomToggle.checked) {
-                shuffleArray(questionOrder);
-            }
-            
-            showMessage(`復習が必要な問題 ${questionOrder.length}問 を抽出しました。\n苦手克服コースを開始します。`);
-            switchTab('train');
-            showQuestion();
-            saveState();
-        });
 
         // ヘッダーの折り畳みトグル
         toggleHeaderBtn.addEventListener('click', () => {
@@ -733,8 +461,6 @@
             btnJumpStart.disabled = false;
 
             resultsHistory = [];
-            showAppUI();
-            updateStats();
             initQuiz();
         }
 
@@ -818,26 +544,8 @@
             const realIndex = questionOrder[currentQuestionIndex];
             const q = questions[realIndex];
             
-            questionNumber.innerText = `第 ${realIndex + 1} 問`;
-            progressText.innerText = `${currentQuestionIndex + 1} / ${questionOrder.length}`;
-            
-            // 過去の成績バッジの更新
-            if (q.stats) {
-                if (q.stats.attempts === 0) {
-                    questionStatsBadge.innerText = '初挑戦';
-                    questionStatsBadge.className = 'mb-4 inline-block bg-blue-100 text-blue-700 font-bold text-xs px-2 py-1 rounded border border-blue-200';
-                } else {
-                    const rate = Math.round((q.stats.corrects / q.stats.attempts) * 100);
-                    let colorClass = 'bg-gray-100 text-gray-700 border-gray-200';
-                    if (rate === 100) colorClass = 'bg-green-100 text-green-700 border-green-200';
-                    else if (rate < 100) colorClass = 'bg-red-100 text-red-700 border-red-200';
-                    
-                    questionStatsBadge.innerText = `過去: ${q.stats.attempts}回解答 / 正解率 ${rate}% (${q.stats.corrects}/${q.stats.attempts})`;
-                    questionStatsBadge.className = `mb-4 inline-block text-xs px-2 py-1 rounded border ${colorClass}`;
-                }
-            } else {
-                questionStatsBadge.style.display = 'none';
-            }
+            questionNumber.innerText = `第 ${currentQuestionIndex + 1} 問`;
+            progressText.innerText = `${currentQuestionIndex + 1} / ${questions.length}`;
             
             const chars = q.q.split('');
             questionText.innerHTML = chars.map((char, index) => `<span id="q-char-${index}">${char}</span>`).join('');
@@ -871,11 +579,6 @@
                 explanation: q.e.replace(/\n/g, ' ')
             });
 
-            // 成績を即時更新
-            if (!q.stats) q.stats = { attempts: 0, corrects: 0 };
-            q.stats.attempts++;
-            if (isCorrect) q.stats.corrects++;
-
             // UI更新
             answerButtons.style.display = 'none';
             resultArea.classList.remove('hidden');
@@ -896,7 +599,7 @@
             }
 
             // 最後の問題の場合は次へボタンのテキストを変更
-            if (currentQuestionIndex >= questionOrder.length - 1) {
+            if (currentQuestionIndex >= questions.length - 1) {
                 btnNext.innerText = '終了して最初から';
             } else {
                 btnNext.innerText = '次の問題へ';
@@ -961,10 +664,9 @@
         }
 
         btnNext.addEventListener('click', () => {
-            if (currentQuestionIndex >= questionOrder.length - 1) {
-                // 終了時は分析画面に遷移するよう提案
-                showMessage('このコースの問題をすべて解き終わりました。\n分析・対策画面から成績を確認してみましょう！');
-                switchTab('analytics');
+            if (currentQuestionIndex >= questions.length - 1) {
+                // 最初に戻る
+                initQuiz();
             } else {
                 currentQuestionIndex++;
                 showQuestion();
@@ -1012,8 +714,7 @@
             document.body.removeChild(textarea);
         }
 
-        // 保存（JSON出力）処理の共通関数
-        function downloadJsonFile() {
+        btnExportJson.addEventListener('click', () => {
             if (questions.length === 0) {
                 showMessage('保存するデータがありません。');
                 return;
@@ -1042,8 +743,9 @@
             const mm = String(now.getMonth() + 1).padStart(2, '0');
             const dd = String(now.getDate()).padStart(2, '0');
             
+            // プレフィックスの提案: quiz_progress_ (クイズの進捗)
             // 現在の進捗番号 (1始まり)
-            const currentNum = Math.min(currentQuestionIndex + 1, questionOrder.length);
+            const currentNum = Math.min(currentQuestionIndex + 1, questions.length);
             const exportFileName = `quiz_progress_${yyyy}${mm}${dd}_q${currentNum}.json`;
 
             const a = document.createElement('a');
@@ -1055,10 +757,7 @@
             URL.revokeObjectURL(url);
             
             showMessage(`${exportFileName}\nとして進捗データをダウンロードしました。\n次回、このファイルを読み込むと続きから再開できます。`);
-        }
-
-        btnExportJson.addEventListener('click', downloadJsonFile);
-        btnHeaderSave.addEventListener('click', downloadJsonFile);
+        });
 
     </script>
 </body>
