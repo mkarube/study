@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,41 +13,52 @@
             background-color: #f3f4f6;
             color: #1f2937;
         }
+
         .highlight {
-            background-color: #fef08a; /* Tailwind yellow-200 */
+            background-color: #fef08a;
+            /* Tailwind yellow-200 */
             border-radius: 0.25rem;
             transition: background-color 0.2s ease;
         }
+
         /* トグルスイッチのスタイル */
         .toggle-checkbox:checked {
             right: 0;
             border-color: #68D391;
         }
-        .toggle-checkbox:checked + .toggle-label {
+
+        .toggle-checkbox:checked+.toggle-label {
             background-color: #68D391;
         }
+
         .toggle-checkbox {
             right: 0;
             z-index: 1;
             border-color: #e2e8f0;
             transition: all 0.3s;
         }
+
         .toggle-label {
             background-color: #cbd5e1;
             transition: all 0.3s;
         }
+
         /* カスタムメッセージボックス */
         #message-box {
             display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
             z-index: 50;
             align-items: center;
             justify-content: center;
         }
     </style>
 </head>
+
 <body class="min-h-screen p-4 md:p-8">
 
     <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
@@ -55,11 +67,16 @@
                 <h1 class="text-2xl font-bold">一問一答トレーニング</h1>
             </div>
             <div class="flex items-center gap-3">
-                <button id="btn-header-save" class="hidden flex items-center gap-1 bg-indigo-500 hover:bg-indigo-400 text-white text-sm py-1.5 px-3 rounded transition shadow">
+                <button id="btn-header-save"
+                    class="hidden flex items-center gap-1 bg-indigo-500 hover:bg-indigo-400 text-white text-sm py-1.5 px-3 rounded transition shadow">
                     💾 <span class="hidden sm:inline">途中保存</span>
                 </button>
-                <button id="toggle-header-btn" class="p-2 bg-indigo-700 rounded-full hover:bg-indigo-800 transition shadow focus:outline-none" title="設定を開閉">
-                    <svg id="header-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transform transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button id="toggle-header-btn"
+                    class="p-2 bg-indigo-700 rounded-full hover:bg-indigo-800 transition shadow focus:outline-none"
+                    title="設定を開閉">
+                    <svg id="header-icon" xmlns="http://www.w3.org/2000/svg"
+                        class="h-6 w-6 transform transition-transform duration-300" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
                     </svg>
                 </button>
@@ -68,19 +85,24 @@
 
         <!-- タブメニュー (ファイル読み込み後に表示) -->
         <div id="tab-menu" class="bg-indigo-700 flex text-white text-sm hidden">
-            <button id="tab-train" class="flex-1 py-3 font-bold bg-indigo-800 transition border-b-4 border-white">トレーニング</button>
-            <button id="tab-analytics" class="flex-1 py-3 font-bold hover:bg-indigo-600 transition border-b-4 border-transparent text-indigo-200">分析・対策</button>
+            <button id="tab-train"
+                class="flex-1 py-3 font-bold bg-indigo-800 transition border-b-4 border-white">トレーニング</button>
+            <button id="tab-analytics"
+                class="flex-1 py-3 font-bold hover:bg-indigo-600 transition border-b-4 border-transparent text-indigo-200">分析・対策</button>
         </div>
 
         <div id="collapsible-area">
             <div class="bg-indigo-600 text-white px-6 pb-6">
                 <p class="text-indigo-200 text-sm mb-4">マークダウンファイル、または保存済みデータ(JSON)を読み込んで開始・再開します。</p>
-                
+
                 <div class="flex items-center">
-                    <label for="file-upload" class="cursor-pointer bg-white text-indigo-600 font-semibold py-2 px-4 rounded shadow hover:bg-gray-100 transition duration-200">
+                    <label for="file-upload"
+                        class="cursor-pointer bg-white text-indigo-600 font-semibold py-2 px-4 rounded shadow hover:bg-gray-100 transition duration-200">
                         ファイルを選択
                     </label>
-                    <input id="file-upload" type="file" accept=".md,.txt,.json" class="hidden">
+                    <!-- <input id="file-upload" type="file" accept=".md,.txt,.json" class="hidden"> -->
+                    <input id="file-upload" type="file" accept=".md,.txt,.json,application/json,text/plain,text/*"
+                        class="hidden">
                     <span id="file-name" class="ml-4 text-sm">ファイル未選択</span>
                 </div>
             </div>
@@ -88,32 +110,43 @@
             <div class="p-6 bg-gray-50 border-b border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="flex items-center justify-between">
                     <span class="font-medium text-gray-700">ランダム出題</span>
-                    <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                        <input type="checkbox" id="random-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
-                        <label for="random-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                    <div
+                        class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" id="random-toggle"
+                            class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+                        <label for="random-toggle"
+                            class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
                     </div>
                 </div>
-                
+
                 <div class="flex items-center justify-between">
                     <span class="font-medium text-gray-700">読み上げ速度 (<span id="speed-display">1.0</span>x)</span>
-                    <input type="range" id="speech-speed" min="0.5" max="4.0" step="0.1" value="1.0" class="w-32 cursor-pointer accent-indigo-600">
+                    <input type="range" id="speech-speed" min="0.5" max="4.0" step="0.1" value="1.0"
+                        class="w-32 cursor-pointer accent-indigo-600">
                 </div>
 
                 <div class="flex items-center justify-between md:col-span-2">
                     <span class="font-medium text-gray-700">読み上げ追従（ハイライト）</span>
-                    <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                        <input type="checkbox" name="toggle" id="highlight-toggle" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
-                        <label for="highlight-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                    <div
+                        class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" name="toggle" id="highlight-toggle" checked
+                            class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+                        <label for="highlight-toggle"
+                            class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between md:col-span-2 p-4 bg-indigo-50 rounded-lg border border-indigo-100 mt-2">
+                <div
+                    class="flex items-center justify-between md:col-span-2 p-4 bg-indigo-50 rounded-lg border border-indigo-100 mt-2">
                     <div class="flex items-center gap-2">
                         <span class="font-medium text-indigo-800">開始問題番号:</span>
-                        <input type="number" id="start-index-input" min="1" value="1" class="w-20 p-1 border rounded text-center focus:ring focus:ring-indigo-200" disabled>
+                        <input type="number" id="start-index-input" min="1" value="1"
+                            class="w-20 p-1 border rounded text-center focus:ring focus:ring-indigo-200" disabled>
                         <span class="text-sm text-indigo-600">/ <span id="total-questions-display">0</span>問</span>
                     </div>
-                    <button id="btn-jump-start" class="bg-indigo-600 text-white px-4 py-1.5 rounded hover:bg-indigo-700 transition text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" disabled>
+                    <button id="btn-jump-start"
+                        class="bg-indigo-600 text-white px-4 py-1.5 rounded hover:bg-indigo-700 transition text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                        disabled>
                         この問題から開始
                     </button>
                 </div>
@@ -124,43 +157,52 @@
             <div class="flex justify-between items-center mb-2">
                 <h2 id="question-number" class="text-xl font-bold text-gray-800">問題</h2>
                 <div class="flex items-center gap-4">
-                    <button id="btn-read-question" class="text-sm bg-blue-100 text-blue-700 font-semibold py-1 px-3 rounded hover:bg-blue-200 transition shadow-sm">
+                    <button id="btn-read-question"
+                        class="text-sm bg-blue-100 text-blue-700 font-semibold py-1 px-3 rounded hover:bg-blue-200 transition shadow-sm">
                         🔊 問題文を読み上げる
                     </button>
                     <span id="progress-text" class="text-sm font-medium text-gray-500"></span>
                 </div>
             </div>
-            
-            <div id="question-stats-badge" class="mb-4 inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded border border-gray-200">
+
+            <div id="question-stats-badge"
+                class="mb-4 inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded border border-gray-200">
                 過去の成績: データなし
             </div>
-            
+
             <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
                 <p id="question-text" class="text-lg text-gray-800 leading-relaxed"></p>
             </div>
 
             <div id="answer-buttons" class="flex gap-4 justify-center mb-8">
-                <button id="btn-maru" class="w-32 py-3 bg-white border-2 border-green-500 text-green-600 font-bold text-2xl rounded-full shadow hover:bg-green-50 transition">〇</button>
-                <button id="btn-batsu" class="w-32 py-3 bg-white border-2 border-red-500 text-red-600 font-bold text-2xl rounded-full shadow hover:bg-red-50 transition">✕</button>
+                <button id="btn-maru"
+                    class="w-32 py-3 bg-white border-2 border-green-500 text-green-600 font-bold text-2xl rounded-full shadow hover:bg-green-50 transition">〇</button>
+                <button id="btn-batsu"
+                    class="w-32 py-3 bg-white border-2 border-red-500 text-red-600 font-bold text-2xl rounded-full shadow hover:bg-red-50 transition">✕</button>
             </div>
 
             <div id="result-area" class="hidden flex-col items-center">
                 <div id="judge-icon" class="text-6xl font-bold mb-2"></div>
                 <p id="judge-text" class="text-xl font-bold mb-6"></p>
-                
-                <button id="btn-explain" class="mb-4 bg-indigo-100 text-indigo-700 font-semibold py-2 px-6 rounded-full hover:bg-indigo-200 transition">
+
+                <button id="btn-explain"
+                    class="mb-4 bg-indigo-100 text-indigo-700 font-semibold py-2 px-6 rounded-full hover:bg-indigo-200 transition">
                     解説を読んで再生
                 </button>
-                
+
                 <div id="explanation-box" class="w-full bg-gray-100 p-4 rounded mb-6 hidden">
                     <p id="explanation-text" class="text-gray-700 leading-relaxed"></p>
                 </div>
 
                 <div class="w-full flex justify-between items-center mt-4">
-                    <button id="btn-copy-result" class="text-sm text-gray-500 hover:text-indigo-600 underline">結果をコピー (TSV)</button>
+                    <button id="btn-copy-result" class="text-sm text-gray-500 hover:text-indigo-600 underline">結果をコピー
+                        (TSV)</button>
                     <div class="flex gap-4">
-                        <button id="btn-export-json" class="bg-white border border-indigo-600 text-indigo-600 font-bold py-2 px-4 rounded shadow hover:bg-indigo-50 transition hidden md:block">進捗を保存 (JSON)</button>
-                        <button id="btn-next" class="bg-indigo-600 text-white font-bold py-2 px-8 rounded shadow hover:bg-indigo-700 transition">次の問題へ</button>
+                        <button id="btn-export-json"
+                            class="bg-white border border-indigo-600 text-indigo-600 font-bold py-2 px-4 rounded shadow hover:bg-indigo-50 transition hidden md:block">進捗を保存
+                            (JSON)</button>
+                        <button id="btn-next"
+                            class="bg-indigo-600 text-white font-bold py-2 px-8 rounded shadow hover:bg-indigo-700 transition">次の問題へ</button>
                     </div>
                 </div>
             </div>
@@ -189,9 +231,12 @@
                     </div>
                 </div>
                 <div class="flex justify-center">
-                    <button id="btn-start-weak-course" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow transition flex items-center gap-2">
+                    <button id="btn-start-weak-course"
+                        class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow transition flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                            <path fill-rule="evenodd"
+                                d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                                clip-rule="evenodd" />
                         </svg>
                         苦手克服コースを開始する
                     </button>
@@ -201,7 +246,8 @@
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-gray-100 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
                     <h3 class="font-bold text-gray-700">問題別成績リスト</h3>
-                    <select id="analytics-filter" class="text-sm border-gray-300 rounded shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <select id="analytics-filter"
+                        class="text-sm border-gray-300 rounded shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                         <option value="all">すべて表示</option>
                         <option value="weak">苦手な問題のみ</option>
                         <option value="unanswered">未回答のみ</option>
@@ -213,8 +259,10 @@
                             <tr>
                                 <th class="py-2 px-4 border-b font-medium text-gray-600 text-sm w-12">No.</th>
                                 <th class="py-2 px-4 border-b font-medium text-gray-600 text-sm">問題 (冒頭)</th>
-                                <th class="py-2 px-4 border-b font-medium text-gray-600 text-sm w-32 text-center">正解率</th>
-                                <th class="py-2 px-4 border-b font-medium text-gray-600 text-sm w-24 text-center">操作</th>
+                                <th class="py-2 px-4 border-b font-medium text-gray-600 text-sm w-32 text-center">正解率
+                                </th>
+                                <th class="py-2 px-4 border-b font-medium text-gray-600 text-sm w-24 text-center">操作
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="analytics-tbody" class="text-sm text-gray-700 divide-y divide-gray-200">
@@ -227,12 +275,15 @@
 
         <div id="empty-state" class="p-12 text-center text-gray-500">
             <p>ファイルを選択してトレーニングを開始してください。</p>
-            <div id="resume-area" class="hidden mt-6 p-6 bg-indigo-50 rounded-lg border border-indigo-100 max-w-md mx-auto">
+            <div id="resume-area"
+                class="hidden mt-6 p-6 bg-indigo-50 rounded-lg border border-indigo-100 max-w-md mx-auto">
                 <p class="text-indigo-800 font-bold mb-2">前回の続きデータが見つかりました</p>
                 <p id="resume-filename" class="text-sm text-indigo-600 mb-6"></p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <button id="btn-resume" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded shadow hover:bg-indigo-700 transition">続きから再開する</button>
-                    <button id="btn-discard" class="bg-white text-gray-600 border border-gray-300 font-bold py-2 px-6 rounded shadow-sm hover:bg-gray-50 transition">破棄して新規開始</button>
+                    <button id="btn-resume"
+                        class="bg-indigo-600 text-white font-bold py-2 px-6 rounded shadow hover:bg-indigo-700 transition">続きから再開する</button>
+                    <button id="btn-discard"
+                        class="bg-white text-gray-600 border border-gray-300 font-bold py-2 px-6 rounded shadow-sm hover:bg-gray-50 transition">破棄して新規開始</button>
                 </div>
             </div>
         </div>
@@ -243,7 +294,8 @@
             <h3 class="text-lg font-bold mb-2 text-gray-800">お知らせ</h3>
             <p id="message-box-text" class="text-gray-600 mb-4"></p>
             <div class="text-right">
-                <button id="message-box-close" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">閉じる</button>
+                <button id="message-box-close"
+                    class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">閉じる</button>
             </div>
         </div>
     </div>
@@ -263,11 +315,11 @@
         let questionOrder = [];
         let currentQuestionIndex = 0;
         let resultsHistory = [];
-        
+
         let currentUtterance = null;
         let currentMarkdown = "";
         let currentFileName = "";
-        
+
         // DOM要素
         const toggleHeaderBtn = document.getElementById('toggle-header-btn');
         const collapsibleArea = document.getElementById('collapsible-area');
@@ -275,12 +327,12 @@
 
         const fileUpload = document.getElementById('file-upload');
         const fileNameDisplay = document.getElementById('file-name');
-        
+
         const randomToggle = document.getElementById('random-toggle');
         const speechSpeedInput = document.getElementById('speech-speed');
         const speedDisplay = document.getElementById('speed-display');
         const highlightToggle = document.getElementById('highlight-toggle');
-        
+
         const startIndexInput = document.getElementById('start-index-input');
         const totalQuestionsDisplay = document.getElementById('total-questions-display');
         const btnJumpStart = document.getElementById('btn-jump-start');
@@ -291,11 +343,11 @@
         const progressText = document.getElementById('progress-text');
         const btnReadQuestion = document.getElementById('btn-read-question');
         const questionText = document.getElementById('question-text');
-        
+
         const answerButtons = document.getElementById('answer-buttons');
         const btnMaru = document.getElementById('btn-maru');
         const btnBatsu = document.getElementById('btn-batsu');
-        
+
         const resultArea = document.getElementById('result-area');
         const judgeIcon = document.getElementById('judge-icon');
         const judgeText = document.getElementById('judge-text');
@@ -313,7 +365,7 @@
         const tabAnalytics = document.getElementById('tab-analytics');
         const analyticsArea = document.getElementById('analytics-area');
         const questionStatsBadge = document.getElementById('question-stats-badge');
-        
+
         const statTotal = document.getElementById('stat-total');
         const statAnswered = document.getElementById('stat-answered');
         const statUnanswered = document.getElementById('stat-unanswered');
@@ -338,14 +390,14 @@
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                
+
                 const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
                 if (token) {
                     await signInWithCustomToken(auth, token);
                 } else {
                     await signInAnonymously(auth);
                 }
-                
+
                 userId = auth.currentUser?.uid;
                 if (userId) {
                     checkSavedState();
@@ -365,14 +417,14 @@
                     const data = docSnap.data();
                     document.getElementById('resume-filename').innerText = `ファイル: ${data.fileName} (進捗: ${data.currentQuestionIndex + 1}/${data.questions.length})`;
                     document.getElementById('resume-area').classList.remove('hidden');
-                    
+
                     document.getElementById('btn-resume').onclick = () => resumeState(data);
                     document.getElementById('btn-discard').onclick = () => {
                         clearSavedState();
                         document.getElementById('resume-area').classList.add('hidden');
                     };
                 }
-            } catch(e) {
+            } catch (e) {
                 console.error("Load error", e);
             }
         }
@@ -395,7 +447,7 @@
                     },
                     updatedAt: new Date().toISOString()
                 });
-            } catch(e) {
+            } catch (e) {
                 console.error("Save error", e);
             }
         }
@@ -405,7 +457,7 @@
             try {
                 const stateRef = doc(db, 'artifacts', appId, 'users', userId, 'quizState', 'default');
                 await deleteDoc(stateRef);
-            } catch(e) {
+            } catch (e) {
                 console.error("Delete error", e);
             }
         }
@@ -417,14 +469,14 @@
             questionOrder = data.questionOrder;
             currentQuestionIndex = data.currentQuestionIndex;
             resultsHistory = data.resultsHistory || [];
-            
+
             if (data.settings) {
                 randomToggle.checked = data.settings.random;
                 speechSpeedInput.value = data.settings.speed;
                 speedDisplay.innerText = parseFloat(data.settings.speed).toFixed(1);
                 highlightToggle.checked = data.settings.highlight;
             }
-            
+
             document.getElementById('file-name').innerText = currentFileName;
 
             // UI要素の復元
@@ -444,7 +496,7 @@
 
             document.getElementById('empty-state').classList.add('hidden');
             document.getElementById('quiz-area').classList.remove('hidden');
-            
+
             showAppUI();
             updateStats();
             showQuestion();
@@ -463,7 +515,7 @@
                 tabTrain.classList.replace('text-indigo-200', 'text-white');
                 tabTrain.classList.replace('border-transparent', 'border-white');
                 tabTrain.classList.add('bg-indigo-800');
-                
+
                 tabAnalytics.classList.replace('text-white', 'text-indigo-200');
                 tabAnalytics.classList.replace('border-white', 'border-transparent');
                 tabAnalytics.classList.remove('bg-indigo-800');
@@ -472,12 +524,12 @@
                 quizArea.classList.remove('hidden');
                 collapsibleArea.classList.add('hidden'); // 学習中は設定を閉じる
                 headerIcon.classList.add('rotate-180');
-                
+
             } else if (tabName === 'analytics') {
                 tabAnalytics.classList.replace('text-indigo-200', 'text-white');
                 tabAnalytics.classList.replace('border-transparent', 'border-white');
                 tabAnalytics.classList.add('bg-indigo-800');
-                
+
                 tabTrain.classList.replace('text-white', 'text-indigo-200');
                 tabTrain.classList.replace('border-white', 'border-transparent');
                 tabTrain.classList.remove('bg-indigo-800');
@@ -486,7 +538,7 @@
                 analyticsArea.classList.remove('hidden');
                 collapsibleArea.classList.add('hidden');
                 headerIcon.classList.add('rotate-180');
-                
+
                 updateStats();
                 renderAnalytics();
             }
@@ -497,7 +549,7 @@
 
         function updateStats() {
             if (!questions || questions.length === 0) return;
-            
+
             // 初期化
             questions.forEach(q => {
                 q.stats = { attempts: 0, corrects: 0 };
@@ -520,14 +572,14 @@
             const filter = analyticsFilter.value;
             let answeredCount = 0;
             let weakCount = 0;
-            
+
             analyticsTbody.innerHTML = '';
-            
+
             questions.forEach((q, index) => {
                 const s = q.stats;
                 const isAnswered = s.attempts > 0;
                 const isWeak = isAnswered && (s.corrects < s.attempts); // 1度でも間違えていれば苦手判定
-                
+
                 if (isAnswered) answeredCount++;
                 if (isWeak) weakCount++;
 
@@ -580,22 +632,22 @@
         analyticsFilter.addEventListener('change', renderAnalytics);
 
         // 特定の問題に直接ジャンプ
-        window.jumpToQuestion = function(targetIndex) {
+        window.jumpToQuestion = function (targetIndex) {
             let orderIndex = questionOrder.indexOf(targetIndex);
-            
+
             // 現在のコース（苦手コース等）に含まれていない場合は、全問コースにリセットする
             if (orderIndex === -1) {
-                questionOrder = Array.from({length: questions.length}, (_, i) => i);
+                questionOrder = Array.from({ length: questions.length }, (_, i) => i);
                 orderIndex = targetIndex;
-                
+
                 // ランダム出題をオフにする
                 randomToggle.checked = false;
                 randomToggle.disabled = true;
                 randomToggle.parentElement.classList.add('opacity-50');
-                
+
                 showMessage(`現在の出題コースに該当の問題が含まれていなかったため、「全問コース」に変更し、第 ${targetIndex + 1} 問 に移動しました。`);
             }
-            
+
             currentQuestionIndex = orderIndex;
             switchTab('train'); // トレーニング画面へ
             showQuestion();
@@ -622,7 +674,7 @@
             if (randomToggle.checked) {
                 shuffleArray(questionOrder);
             }
-            
+
             showMessage(`復習が必要な問題 ${questionOrder.length}問 を抽出しました。\n苦手克服コースを開始します。`);
             switchTab('train');
             showQuestion();
@@ -647,7 +699,7 @@
             currentFileName = file.name;
             fileNameDisplay.innerText = currentFileName;
             const reader = new FileReader();
-            
+
             reader.onload = (event) => {
                 const fileContent = event.target.result;
                 if (file.name.toLowerCase().endsWith('.json')) {
@@ -671,10 +723,10 @@
             let currentQ = null;
             let mode = null; // 'Q', 'A', 'E'
             questions = [];
-            
+
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i].trim();
-                
+
                 if (line.startsWith('##### Q')) {
                     if (currentQ && currentQ.q && currentQ.a && currentQ.e) {
                         questions.push(currentQ);
@@ -686,8 +738,8 @@
                 } else if (line.startsWith('##### E')) {
                     mode = 'E';
                 } else if (line.startsWith('#### ') || line.startsWith('### ') || line.startsWith('## ')) {
-                     // 見出しが来たら一旦区切る
-                     if (currentQ && currentQ.q && currentQ.a && currentQ.e && mode) {
+                    // 見出しが来たら一旦区切る
+                    if (currentQ && currentQ.q && currentQ.a && currentQ.e && mode) {
                         questions.push(currentQ);
                         currentQ = null;
                         mode = null;
@@ -701,7 +753,7 @@
                     }
                 }
             }
-            
+
             // 最後の問題を追加
             if (currentQ && currentQ.q && currentQ.a && currentQ.e) {
                 questions.push(currentQ);
@@ -710,10 +762,10 @@
             // 余分な空白を削除し、Aは〇か✕のみにする
             questions = questions.map(item => {
                 let answer = item.a.replace(/○/g, '〇').trim(); // 表記ゆれ対応
-                if(answer.includes('〇')) answer = '〇';
-                if(answer.includes('×')) answer = '✕';
-                if(answer.includes('✕')) answer = '✕';
-                
+                if (answer.includes('〇')) answer = '〇';
+                if (answer.includes('×')) answer = '✕';
+                if (answer.includes('✕')) answer = '✕';
+
                 return {
                     q: item.q.trim(),
                     a: answer,
@@ -739,8 +791,8 @@
         }
 
         function initQuiz() {
-            questionOrder = Array.from({length: questions.length}, (_, i) => i);
-            
+            questionOrder = Array.from({ length: questions.length }, (_, i) => i);
+
             // ランダムトグルの状態リセット
             randomToggle.disabled = false;
             randomToggle.parentElement.classList.remove('opacity-50');
@@ -748,10 +800,10 @@
             if (randomToggle.checked) {
                 shuffleArray(questionOrder);
             }
-            
+
             currentQuestionIndex = 0;
             startIndexInput.value = 1; // 初期化時は1に戻す
-            
+
             emptyState.classList.add('hidden');
             quizArea.classList.remove('hidden');
             showQuestion();
@@ -766,7 +818,7 @@
         }
 
         randomToggle.addEventListener('change', () => {
-            if(questions.length > 0) {
+            if (questions.length > 0) {
                 // 出題順を再計算して最初から
                 initQuiz();
             }
@@ -787,7 +839,7 @@
                 randomToggle.disabled = true;
                 randomToggle.parentElement.classList.add('opacity-50'); // 見た目も無効化
                 // 順番を元に戻す
-                questionOrder = Array.from({length: questions.length}, (_, i) => i);
+                questionOrder = Array.from({ length: questions.length }, (_, i) => i);
                 showMessage(`${startVal}問目から開始します。\n途中から開始するため、ランダム出題はオフになりました。`);
             } else {
                 randomToggle.disabled = false;
@@ -800,7 +852,7 @@
 
             currentQuestionIndex = startVal - 1;
             resultsHistory = []; // 途中開始の場合も履歴はリセット
-            
+
             emptyState.classList.add('hidden');
             quizArea.classList.remove('hidden');
             showQuestion();
@@ -817,10 +869,10 @@
             stopSpeech();
             const realIndex = questionOrder[currentQuestionIndex];
             const q = questions[realIndex];
-            
+
             questionNumber.innerText = `第 ${realIndex + 1} 問`;
             progressText.innerText = `${currentQuestionIndex + 1} / ${questionOrder.length}`;
-            
+
             // 過去の成績バッジの更新
             if (q.stats) {
                 if (q.stats.attempts === 0) {
@@ -831,17 +883,17 @@
                     let colorClass = 'bg-gray-100 text-gray-700 border-gray-200';
                     if (rate === 100) colorClass = 'bg-green-100 text-green-700 border-green-200';
                     else if (rate < 100) colorClass = 'bg-red-100 text-red-700 border-red-200';
-                    
+
                     questionStatsBadge.innerText = `過去: ${q.stats.attempts}回解答 / 正解率 ${rate}% (${q.stats.corrects}/${q.stats.attempts})`;
                     questionStatsBadge.className = `mb-4 inline-block text-xs px-2 py-1 rounded border ${colorClass}`;
                 }
             } else {
                 questionStatsBadge.style.display = 'none';
             }
-            
+
             const chars = q.q.split('');
             questionText.innerHTML = chars.map((char, index) => `<span id="q-char-${index}">${char}</span>`).join('');
-            
+
             answerButtons.style.display = 'flex';
             resultArea.classList.add('hidden');
             explanationBox.classList.add('hidden');
@@ -861,7 +913,7 @@
             const realIndex = questionOrder[currentQuestionIndex];
             const q = questions[realIndex];
             const isCorrect = (userAnswer === q.a);
-            
+
             // 結果を保存
             resultsHistory.push({
                 question: q.q.replace(/\n/g, ' '),
@@ -879,7 +931,7 @@
             // UI更新
             answerButtons.style.display = 'none';
             resultArea.classList.remove('hidden');
-            
+
             // モバイル環境等で保存ボタンを表示するよう調整
             btnExportJson.classList.remove('hidden', 'md:block');
 
@@ -901,27 +953,27 @@
             } else {
                 btnNext.innerText = '次の問題へ';
             }
-            
+
             saveState();
         }
 
         btnExplain.addEventListener('click', () => {
             const realIndex = questionOrder[currentQuestionIndex];
             const q = questions[realIndex];
-            
+
             explanationBox.classList.remove('hidden');
-            
+
             // テキストをスパンで囲んでハイライト可能にする（簡易的な文節/文字区切り）
             // 日本語の boundary event はブラウザ依存が強いため、文字単位で区切る
             const chars = q.e.split('');
             explanationText.innerHTML = chars.map((char, index) => `<span id="e-char-${index}">${char}</span>`).join('');
-            
+
             readText(q.e, explanationText, 'e-char-');
         });
 
         function readText(text, containerElement, idPrefix) {
             stopSpeech();
-            
+
             if (!window.speechSynthesis) {
                 showMessage('お使いのブラウザは音声読み上げに対応していません。');
                 return;
@@ -930,7 +982,7 @@
             currentUtterance = new SpeechSynthesisUtterance(text);
             currentUtterance.lang = 'ja-JP';
             currentUtterance.rate = parseFloat(speechSpeedInput.value);
-            
+
             if (highlightToggle.checked && containerElement) {
                 currentUtterance.onboundary = (event) => {
                     // event.charIndex から読み上げ中の文字をハイライト
@@ -938,7 +990,7 @@
                         // 以前のハイライトをクリア
                         const spans = containerElement.querySelectorAll('span');
                         spans.forEach(span => span.classList.remove('highlight', 'bg-yellow-200', 'text-black'));
-                        
+
                         // 今回の範囲をハイライト
                         const length = event.charLength || 1; // Safari等でcharLengthがない場合のフォールバック
                         for (let i = 0; i < length; i++) {
@@ -980,7 +1032,7 @@
 
             // TSV形式のヘッダー
             let tsv = "問題文\tあなたの回答\t正解\t正誤\t解説\n";
-            
+
             resultsHistory.forEach(r => {
                 const mark = r.isCorrect ? '〇' : '✕';
                 tsv += `${r.question}\t${r.userAnswer}\t${r.correctAnswer}\t${mark}\t${r.explanation}\n`;
@@ -1036,12 +1088,12 @@
             const dataStr = JSON.stringify(exportData, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            
+
             const now = new Date();
             const yyyy = now.getFullYear();
             const mm = String(now.getMonth() + 1).padStart(2, '0');
             const dd = String(now.getDate()).padStart(2, '0');
-            
+
             // 現在の進捗番号 (1始まり)
             const currentNum = Math.min(currentQuestionIndex + 1, questionOrder.length);
             const exportFileName = `quiz_progress_${yyyy}${mm}${dd}_q${currentNum}.json`;
@@ -1053,7 +1105,7 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
+
             showMessage(`${exportFileName}\nとして進捗データをダウンロードしました。\n次回、このファイルを読み込むと続きから再開できます。`);
         }
 
@@ -1062,4 +1114,5 @@
 
     </script>
 </body>
+
 </html>
