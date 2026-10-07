@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voca - 単語学習システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .highlight {
+            background-color: #fef08a; /* bg-yellow-200 */
+            transition: background-color 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
+
+    <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- ヘッダーとコントロール -->
+        <header class="mb-8 bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-indigo-600 tracking-tight">Voca</h1>
+                <p class="text-sm text-gray-500 mt-1">スプレッドシート・Markdown対応 読み上げ学習</p>
+            </div>
+            
+            <div class="flex flex-wrap gap-2 items-center">
+                <!-- JSON読込 -->
+                <div class="relative">
+                    <input type="file" id="jsonInput" accept=".json" class="hidden" onchange="loadProgress(event)">
+                    <button onclick="document.getElementById('jsonInput').click()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        📁 JSON読込
+                    </button>
+                </div>
+                <!-- JSON保存 -->
+                <button onclick="saveProgress()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                        💾 進捗を保存
+                </button>
+            </div>
+        </header>
+
+        <!-- 設定パネル（速度と言語） -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row gap-6">
+            
+            <!-- 単語設定 -->
+            <div class="flex-1 space-y-4 p-4 bg-indigo-50/50 rounded-lg border border-indigo-100">
+                <h3 class="text-sm font-bold text-indigo-800 border-b border-indigo-200 pb-2 flex items-center gap-2">
+                    <span>📝</span> 単語の読み上げ設定
+                </h3>
+                <div class="flex items-center gap-3">
+                    <label class="text-sm font-medium text-gray-700 w-10">言語:</label>
+                    <select id="wordLang" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2" onchange="updateSettings()">
+                        <option value="ja-JP">日本語</option>
+                        <option value="en-US" selected>英語 (US)</option>
+                        <option value="en-GB">英語 (UK)</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-3">
+                    <label class="text-sm font-medium text-gray-700 w-10">速度:</label>
+                    <input type="range" id="wordSpeedSlider" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full accent-indigo-600" oninput="updateWordSpeed(this.value)">
+                    <span id="wordSpeedValue" class="text-sm font-bold text-indigo-600 w-8 text-right">1.0</span>
+                </div>
+            </div>
+            
+            <!-- 解説設定 -->
+            <div class="flex-1 space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="text-sm font-bold text-gray-700 border-b border-gray-200 pb-2 flex items-center gap-2">
+                    <span>📖</span> 解説の読み上げ設定
+                </h3>
+                <div class="flex items-center gap-3">
+                    <label class="text-sm font-medium text-gray-700 w-10">言語:</label>
+                    <select id="descLang" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2" onchange="updateSettings()">
+                        <option value="ja-JP" selected>日本語</option>
+                        <option value="en-US">英語 (US)</option>
+                        <option value="en-GB">英語 (UK)</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-3">
+                    <label class="text-sm font-medium text-gray-700 w-10">速度:</label>
+                    <input type="range" id="descSpeedSlider" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full accent-gray-600" oninput="updateDescSpeed(this.value)">
+                    <span id="descSpeedValue" class="text-sm font-bold text-gray-600 w-8 text-right">1.0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- タブナビゲーション -->
+        <div class="flex border-b border-gray-200 mb-6">
+            <button onclick="switchTab('study')" id="tab-study" class="px-6 py-3 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600 focus:outline-none">学習画面</button>
+            <button onclick="switchTab('edit')" id="tab-edit" class="px-6 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 focus:outline-none">データ読込・編集</button>
+        </div>
+
+        <!-- 学習画面 -->
+        <div id="view-study" class="space-y-4">
+            <!-- 検索とソート -->
+            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-3">
+                <div class="flex-1 relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">🔍</span>
+                    <input type="text" id="searchInput" placeholder="単語・解説・タグ（章など）で絞り込み..." class="w-full pl-10 p-2 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500" oninput="updateFilterAndSort()">
+                </div>
+                <select id="sortSelect" class="border border-gray-300 text-gray-900 text-sm rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500" onchange="updateFilterAndSort()">
+                    <option value="default">標準（登録順）</option>
+                    <option value="wordCountAsc">単語再生: 少ない順</option>
+                    <option value="wordCountDesc">単語再生: 多い順</option>
+                    <option value="descCountAsc">解説再生: 少ない順</option>
+                    <option value="descCountDesc">解説再生: 多い順</option>
+                </select>
+            </div>
+
+            <!-- 単語リスト -->
+            <div id="wordList" class="space-y-4">
+                <div class="text-center py-12 text-gray-500">
+                    「データ読込・編集」タブから単語を追加するか、JSONを読み込んでください。
+                </div>
+            </div>
+        </div>
+
+        <!-- 編集画面 -->
+        <div id="view-edit" class="hidden">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                    <h3 class="font-bold text-gray-800">データの貼り付け</h3>
+                    <!-- テンプレートDLボタン -->
+                    <div class="flex gap-2">
+                        <button onclick="downloadFormat('sheet')" class="text-xs bg-green-50 hover:bg-green-100 text-green-700 px-3 py-1.5 rounded border border-green-200 transition-colors">
+                            📊 シート用雛形DL
+                        </button>
+                        <button onclick="downloadFormat('markdown')" class="text-xs bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-1.5 rounded border border-gray-200 transition-colors">
+                            📝 MD用雛形DL
+                        </button>
+                    </div>
+                </div>
+
+                <p class="text-sm text-gray-500 mb-4">
+                    スプレッドシートの範囲をそのままコピー＆ペーストするか、Markdown形式で入力してください。
+                </p>
+
+                <!-- 列設定 -->
+                <div class="flex items-center gap-4 mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <span class="text-sm font-medium text-gray-700">表の読込設定:</span>
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-gray-600">単語の列番号</label>
+                        <input type="number" id="wordColInput" value="4" min="1" class="w-16 p-1 text-sm border rounded text-center focus:ring-indigo-500">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-gray-600">解説の列番号</label>
+                        <input type="number" id="descColInput" value="6" min="1" class="w-16 p-1 text-sm border rounded text-center focus:ring-indigo-500">
+                    </div>
+                    <span class="text-xs text-gray-400 ml-auto hidden sm:block">※他の列はタグとして表示</span>
+                </div>
+
+                <textarea id="markdownInput" rows="12" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm shadow-sm" placeholder="ここにスプレッドシートの表を貼り付けるか、Markdownを入力してください。"></textarea>
+                
+                <div class="flex justify-end mt-4">
+                    <button onclick="parseInput()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors shadow-sm">
+                        データをパースして更新
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 状態管理 ---
+        let state = {
+            words: [],
+            wordSpeed: 1.0,
+            descSpeed: 1.0,
+            wordLang: 'en-US', // デフォルトは英語に変更可能
+            descLang: 'ja-JP',
+            filterText: '',
+            sortType: 'default',
+            wordCol: 4,
+            descCol: 6,
+            rawData: '' // 入力されたテキストを保持
+        };
+
+        // --- 音声設定 ---
+        const speechSupported = 'speechSynthesis' in window;
+        let voices = [];
+
+        if (speechSupported) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                voices = window.speechSynthesis.getVoices();
+            };
+        }
+
+        function initApp() {
+            // 初回表示用ダミーデータ（Markdown）
+            const defaultMarkdown = `## Apple\nりんご。赤くて甘い果物。\n\n## Banana\nバナナ。黄色くて細長い果物。`;
+            const mdInput = document.getElementById('markdownInput');
+            if (!mdInput.value) {
+                mdInput.value = defaultMarkdown;
+            }
+            
+            if (speechSupported) {
+                voices = window.speechSynthesis.getVoices();
+            }
+            parseInput(); // 初期データを反映
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+
+        // --- UI操作 ---
+        function switchTab(tabId) {
+            const studyView = document.getElementById('view-study');
+            const editView = document.getElementById('view-edit');
+            const studyTab = document.getElementById('tab-study');
+            const editTab = document.getElementById('tab-edit');
+
+            if (tabId === 'study') {
+                studyView.classList.remove('hidden');
+                editView.classList.add('hidden');
+                studyTab.classList.add('text-indigo-600', 'border-indigo-600');
+                studyTab.classList.remove('text-gray-500', 'border-transparent');
+                editTab.classList.remove('text-indigo-600', 'border-indigo-600');
+                editTab.classList.add('text-gray-500', 'border-transparent');
+            } else {
+                studyView.classList.add('hidden');
+                editView.classList.remove('hidden');
+                editTab.classList.add('text-indigo-600', 'border-indigo-600');
+                editTab.classList.remove('text-gray-500', 'border-transparent');
+                studyTab.classList.remove('text-indigo-600', 'border-indigo-600');
+                studyTab.classList.add('text-gray-500', 'border-transparent');
+            }
+        }
+
+        function updateWordSpeed(val) {
+            state.wordSpeed = parseFloat(val);
+            document.getElementById('wordSpeedValue').textContent = state.wordSpeed.toFixed(1);
+        }
+
+        function updateDescSpeed(val) {
+            state.descSpeed = parseFloat(val);
+            document.getElementById('descSpeedValue').textContent = state.descSpeed.toFixed(1);
+        }
+
+        function updateSettings() {
+            state.wordLang = document.getElementById('wordLang').value;
+            state.descLang = document.getElementById('descLang').value;
+        }
+
+        function updateFilterAndSort() {
+            state.filterText = document.getElementById('searchInput').value.toLowerCase();
+            state.sortType = document.getElementById('sortSelect').value;
+            renderStudyList();
+        }
+
+        // --- データ解析 (TSV / Markdown) ---
+        function parseInput() {
+            const rawText = document.getElementById('markdownInput').value.trim();
+            if (!rawText) return;
+            
+            state.rawData = rawText;
+            state.wordCol = parseInt(document.getElementById('wordColInput').value) || 4;
+            state.descCol = parseInt(document.getElementById('descColInput').value) || 6;
+
+            const wordColIdx = state.wordCol - 1;
+            const descColIdx = state.descCol - 1;
+
+            let newWords = [];
+
+            // スプレッドシートからのコピペ（タブ区切り）が含まれているか判定
+            if (rawText.indexOf('\t') !== -1) {
+                // TSVパース（セル内改行対応）
+                const rows = parseTSV(rawText);
+                
+                rows.forEach((row, rowIndex) => {
+                    // 最低限、単語列が存在するかチェック（見出し行らしきものはスキップしてもよいが、一旦全て読み込む）
+                    if (row.length <= wordColIdx) return;
+                    
+                    const word = (row[wordColIdx] || '').trim();
+                    const desc = (row[descColIdx] || '').trim();
+                    
+                    if (!word) return;
+
+                    // その他の列をタグとして収集
+                    const tags = [];
+                    row.forEach((cell, cIdx) => {
+                        const t = cell.trim();
+                        // 単語・解説列以外で、空でなければタグ化
+                        if (cIdx !== wordColIdx && cIdx !== descColIdx && t) {
+                            // 長すぎるタグは除外するなどの処理も可能
+                            tags.push(t);
+                        }
+                    });
+
+                    newWords.push({
+                        id: generateId(),
+                        word: word,
+                        description: desc,
+                        tags: tags,
+                        wordCount: 0,
+                        descCount: 0,
+                        originalIndex: rowIndex // 標準ソート用
+                    });
+                });
+
+            } else {
+                // Markdownパース（従来）
+                const lines = rawText.split('\n');
+                let currentWord = null;
+                let currentDesc = [];
+                let orderIdx = 0;
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line.match(/^#+\s*/)) {
+                        if (currentWord) {
+                            newWords.push({
+                                id: generateId(),
+                                word: currentWord,
+                                description: currentDesc.join('\n').trim(),
+                                tags: [],
+                                wordCount: 0,
+                                descCount: 0,
+                                originalIndex: orderIdx++
+                            });
+                        }
+                        currentWord = line.replace(/^#+\s*/, '').trim();
+                        currentDesc = [];
+                    } else if (line !== '' && currentWord) {
+                        currentDesc.push(line);
+                    }
+                }
+                if (currentWord) {
+                    newWords.push({
+                        id: generateId(),
+                        word: currentWord,
+                        description: currentDesc.join('\n').trim(),
+                        tags: [],
+                        wordCount: 0,
+                        descCount: 0,
+                        originalIndex: orderIdx
+                    });
+                }
+            }
+
+            // カウント履歴を引き継ぐ
+            mergeWords(newWords);
+            
+            // 検索とソートのUIをリセット（任意）
+            // document.getElementById('searchInput').value = '';
+            // document.getElementById('sortSelect').value = 'default';
+            // state.filterText = '';
+            // state.sortType = 'default';
+
+            renderStudyList();
+            switchTab('study');
+        }
+
+        // TSVパーサー（ダブルクォーテーションで囲まれたセル内改行を正しく処理する）
+        function parseTSV(text) {
+            let rows = [];
+            let row = [];
+            let cell = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                let nextChar = text[i+1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        cell += '"'; // エスケープされたクォーテーション
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === '\t' && !inQuotes) {
+                    row.push(cell);
+                    cell = '';
+                } else if ((char === '\n' || (char === '\r' && nextChar === '\n')) && !inQuotes) {
+                    if (char === '\r') i++; // \r\nの\nをスキップ
+                    row.push(cell);
+                    rows.push(row);
+                    row = [];
+                    cell = '';
+                } else {
+                    cell += char;
+                }
+            }
+            if (cell || row.length > 0) {
+                row.push(cell);
+                rows.push(row);
+            }
+            return rows;
+        }
+
+        function mergeWords(newWords) {
+            newWords.forEach(newObj => {
+                // 単語名が一致する過去データを検索
+                const existing = state.words.find(w => w.word === newObj.word);
+                if (existing) {
+                    newObj.wordCount = existing.wordCount !== undefined ? existing.wordCount : (existing.count || 0);
+                    newObj.descCount = existing.descCount || 0;
+                    newObj.id = existing.id; // IDを引き継ぐ
+                }
+            });
+            state.words = newWords;
+        }
+
+        function generateId() {
+            return Math.random().toString(36).substring(2, 11);
+        }
+
+        // --- 描画処理 ---
+        function getFilteredAndSortedWords() {
+            let list = [...state.words];
+
+            // 絞り込み
+            if (state.filterText) {
+                const query = state.filterText;
+                list = list.filter(w => {
+                    const matchWord = w.word.toLowerCase().includes(query);
+                    const matchDesc = w.description.toLowerCase().includes(query);
+                    const matchTags = w.tags && w.tags.some(t => t.toLowerCase().includes(query));
+                    return matchWord || matchDesc || matchTags;
+                });
+            }
+
+            // 並び替え
+            if (state.sortType === 'wordCountAsc') {
+                list.sort((a, b) => (a.wordCount || 0) - (b.wordCount || 0));
+            } else if (state.sortType === 'wordCountDesc') {
+                list.sort((a, b) => (b.wordCount || 0) - (a.wordCount || 0));
+            } else if (state.sortType === 'descCountAsc') {
+                list.sort((a, b) => (a.descCount || 0) - (b.descCount || 0));
+            } else if (state.sortType === 'descCountDesc') {
+                list.sort((a, b) => (b.descCount || 0) - (a.descCount || 0));
+            } else {
+                // default (元の順番)
+                list.sort((a, b) => a.originalIndex - b.originalIndex);
+            }
+
+            return list;
+        }
+
+        function renderStudyList() {
+            const container = document.getElementById('wordList');
+            container.innerHTML = '';
+
+            const displayList = getFilteredAndSortedWords();
+
+            if (displayList.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-gray-500">条件に一致する単語がありません。</div>';
+                return;
+            }
+
+            displayList.forEach((item) => {
+                const wCount = item.wordCount || 0;
+                const dCount = item.descCount || 0;
+
+                // タグ（その他の列）のHTML生成
+                let tagsHtml = '';
+                if (item.tags && item.tags.length > 0) {
+                    tagsHtml = `<div class="flex flex-wrap gap-1.5 mb-2">` + 
+                        item.tags.map(t => `<span class="bg-gray-100 text-gray-600 text-[11px] px-2 py-0.5 rounded border border-gray-200">${t}</span>`).join('') + 
+                        `</div>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow';
+                card.id = `card-${item.id}`;
+                
+                card.innerHTML = `
+                    <!-- タグ表示部 -->
+                    ${tagsHtml}
+                    
+                    <!-- 単語セクション -->
+                    <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-50">
+                        <h2 id="text-word-${item.id}" class="text-xl font-bold text-gray-900 p-1 rounded inline-block">${item.word}</h2>
+                        <div class="flex items-center gap-3">
+                            <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
+                                単語: <span id="word-count-${item.id}">${wCount}</span>回
+                            </span>
+                            <button onclick="readWord('${item.id}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 p-2 rounded-full transition-colors flex items-center justify-center shrink-0" title="単語を読み上げる">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 解説セクション -->
+                    <div class="flex justify-between items-start gap-4">
+                        <p id="text-desc-${item.id}" class="text-gray-600 whitespace-pre-wrap p-1 rounded flex-1 text-sm sm:text-base">${item.description}</p>
+                        <div class="flex flex-col items-end gap-1 shrink-0 mt-1">
+                            <button onclick="readDesc('${item.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-500 p-2 rounded-full transition-colors flex items-center justify-center" title="解説を読み上げる">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                </svg>
+                            </button>
+                            <span class="text-gray-400 text-[10px] whitespace-nowrap">
+                                解説: <span id="desc-count-${item.id}">${dCount}</span>回
+                            </span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- 読み上げ機能 ---
+        function getVoiceForLang(langCode) {
+            if (voices.length === 0) return null;
+            let match = voices.find(voice => voice.lang === langCode);
+            if (!match) {
+                const shortLang = langCode.split('-')[0];
+                match = voices.find(voice => voice.lang.startsWith(shortLang));
+            }
+            return match || null;
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.highlight').forEach(el => {
+                el.classList.remove('highlight');
+            });
+        }
+
+        function readWord(id) {
+            if (!speechSupported) {
+                alert('お使いの環境では音声読み上げがサポートされていません。');
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+            const item = state.words.find(w => w.id === id);
+            if (!item) return;
+
+            clearHighlights();
+            const wordElement = document.getElementById(`text-word-${id}`);
+            document.getElementById(`card-${id}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            const utterWord = new SpeechSynthesisUtterance(item.word);
+            utterWord.rate = state.wordSpeed;
+            utterWord.lang = state.wordLang;
+            const wordVoice = getVoiceForLang(state.wordLang);
+            if (wordVoice) utterWord.voice = wordVoice;
+
+            utterWord.onstart = () => wordElement.classList.add('highlight');
+            utterWord.onend = () => {
+                wordElement.classList.remove('highlight');
+                item.wordCount = (item.wordCount || 0) + 1;
+                document.getElementById(`word-count-${id}`).textContent = item.wordCount;
+            };
+
+            window.speechSynthesis.speak(utterWord);
+        }
+
+        function readDesc(id) {
+            if (!speechSupported) {
+                alert('お使いの環境では音声読み上げがサポートされていません。');
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+            const item = state.words.find(w => w.id === id);
+            if (!item) return;
+
+            clearHighlights();
+            const descElement = document.getElementById(`text-desc-${id}`);
+            document.getElementById(`card-${id}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            const utterDesc = new SpeechSynthesisUtterance(item.description);
+            utterDesc.rate = state.descSpeed;
+            utterDesc.lang = state.descLang;
+            const descVoice = getVoiceForLang(state.descLang);
+            if (descVoice) utterDesc.voice = descVoice;
+
+            utterDesc.onstart = () => descElement.classList.add('highlight');
+            utterDesc.onend = () => {
+                descElement.classList.remove('highlight');
+                item.descCount = (item.descCount || 0) + 1;
+                document.getElementById(`desc-count-${id}`).textContent = item.descCount;
+            };
+
+            window.speechSynthesis.speak(utterDesc);
+        }
+
+        // --- データ入出力 ---
+        function saveProgress() {
+            // 現在のテキストエリアの内容も保存（再開時の編集用）
+            state.rawData = document.getElementById('markdownInput').value;
+            
+            const dataStr = JSON.stringify(state, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = `voca_progress_${new Date().toISOString().slice(0,10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        function loadProgress(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const loadedState = JSON.parse(e.target.result);
+                    if (loadedState.words) {
+                        state = loadedState;
+                        
+                        // 設定の復元
+                        if (state.wordSpeed !== undefined) {
+                            document.getElementById('wordSpeedSlider').value = state.wordSpeed;
+                            updateWordSpeed(state.wordSpeed);
+                        }
+                        if (state.descSpeed !== undefined) {
+                            document.getElementById('descSpeedSlider').value = state.descSpeed;
+                            updateDescSpeed(state.descSpeed);
+                        }
+                        if (state.wordLang) document.getElementById('wordLang').value = state.wordLang;
+                        if (state.descLang) document.getElementById('descLang').value = state.descLang;
+                        
+                        // 列番号の復元
+                        if (state.wordCol) document.getElementById('wordColInput').value = state.wordCol;
+                        if (state.descCol) document.getElementById('descColInput').value = state.descCol;
+
+                        // テキストエリアの復元
+                        if (state.rawData) {
+                            document.getElementById('markdownInput').value = state.rawData;
+                        } else if (state.markdown) {
+                            document.getElementById('markdownInput').value = state.markdown;
+                        }
+                        
+                        // 検索・ソートの復元
+                        if (state.filterText !== undefined) document.getElementById('searchInput').value = state.filterText;
+                        if (state.sortType !== undefined) document.getElementById('sortSelect').value = state.sortType;
+
+                        renderStudyList();
+                        switchTab('study');
+                        alert('データを読み込みました！');
+                    } else {
+                        alert('無効なデータ形式です。');
+                    }
+                } catch (error) {
+                    alert('ファイルの読み込みに失敗しました。');
+                    console.error(error);
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function downloadFormat(type) {
+            let content = "";
+            let filename = "";
+            let mimeType = "";
+
+            if (type === 'sheet') {
+                // タブ区切り文字列 (TSV/CSV) の雛形
+                content = "No.\t章\t重要度\t用語（書き取り対象）\tふりがな\t意味・定義・重要ポイント\n1\t1：基本事項\tA\tコンプライアンス\tこんぷらいあんす\t法令等の遵守。社会規範に沿った活動。\n2\t1：基本事項\tA\tリスクマネジメント\tりすくまねじめんと\t不確定要素を把握し、予防を講じる手法。";
+                filename = "voca_template.tsv";
+                mimeType = "text/tab-separated-values";
+            } else {
+                // Markdown の雛形
+                content = "## コンプライアンス\n法令等の遵守。社会規範に沿った活動。\n\n## リスクマネジメント\n不確定要素を把握し、予防を講じる手法。";
+                filename = "voca_template.md";
+                mimeType = "text/markdown";
+            }
+
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
