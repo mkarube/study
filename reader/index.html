@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Markdown 読み上げ</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --bd: #e5e7eb;
+      --txt: #111827;
+      --muted: #6b7280;
+      --accent: #4f46e5;
+      --accent2: #eef2ff;
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--txt);
+      font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
+      -webkit-text-size-adjust: 100%;
+      padding-bottom: calc(var(--dockH, 60px) + env(safe-area-inset-bottom));
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(246, 247, 249, 0.95);
+      backdrop-filter: blur(10px);
+      padding-top: env(safe-area-inset-top);
+    }
+
+    .title {
+      font-size: 16px;
+      font-weight: 800;
+      margin: 10px 2px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--bd);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+    }
+
+    .stack { display: grid; gap: 10px; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input[type="file"], select, button, textarea, input[type="text"] {
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+      font-size: 15px;
+    }
+
+    select { width: 100%; }
+    textarea { width: 100%; min-height: 200px; resize: vertical; line-height: 1.5; }
+
+    button {
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      padding: 12px 14px;
+      font-weight: 700;
+    }
+
+    button.ghost { background: #fff; }
+
+    .pill {
+      font-size: 12px;
+      background: #f3f4f6;
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: var(--txt);
+      border: 1px solid #e5e7eb;
+    }
+
+    .muted { color: var(--muted); font-size: 12px; }
+
+    .progress {
+      height: 10px;
+      border-radius: 999px;
+      background: var(--accent2);
+      border: 1px solid var(--bd);
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width .15s linear;
+    }
+
+    .preview {
+      height: 50vh;
+      min-height: 320px;
+      overflow: auto;
+      border: 1px solid var(--bd);
+      border-radius: var(--radius);
+      padding: 10px;
+      background: #fff;
+      scroll-behavior: smooth;
+    }
+
+    .previewHeader {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px;
+      margin: -10px -10px 10px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+    }
+
+    .miniBtn {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      background: #fff;
+      border: 1px solid #d1d5db;
+    }
+
+    .miniBtn.primaryMini {
+      background: var(--accent2);
+      border-color: #c7d2fe;
+      color: #1f2a9a;
+    }
+
+    .block {
+      border-radius: 14px;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid transparent;
+      position: relative;
+    }
+
+    .block:hover { background: #f9fafb; }
+    .block.active {
+      background: var(--accent2);
+      border-color: #c7d2fe;
+    }
+
+    .block.active::before {
+      content: "▶";
+      position: absolute;
+      left: 8px;
+      top: 10px;
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    .block.active > * { padding-left: 18px; }
+
+    .h1 { font-size: 19px; font-weight: 900; margin: 0; }
+    .h2 { font-size: 17px; font-weight: 900; margin: 0; }
+    .h3 { font-size: 15px; font-weight: 900; margin: 0; }
+    .p { margin: 0; }
+    .ul, .ol { margin: 0; padding-left: 20px; }
+
+    .toggleRow { display: flex; gap: 12px; align-items: center; }
+    .toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+
+    .playerDock {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 999;
+      padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+      background: rgba(246, 247, 249, 0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(229, 231, 235, 0.9);
+    }
+
+    .playerDockInner {
+      max-width: 980px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid var(--bd);
+      border-radius: 18px;
+      padding: 6px;
+    }
+
+    .dockRow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .iconBtn {
+      width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 900;
+      background: #fff;
+      border: 1px solid #d1d5db;
+    }
+
+    .iconBtn.primary {
+      background: #111827;
+      border-color: #111827;
+      color: #fff;
+    }
+
+    .speedSelect {
+      height: 40px;
+      border-radius: 14px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 0 8px;
+    }
+
+    .hide { display: none !important; }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="wrap">
+      <div class="title">Markdown 読み上げ</div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="stack">
+      <div class="card stack">
+        <div class="row">
+          <div style="flex:1; min-width: 220px;">
+            <label>Markdownファイル（.md）</label>
+            <input id="file" type="file" accept=".md,text/markdown,text/plain" style="width:100%;" />
+            <div id="fname" class="muted" style="margin-top:4px;"></div>
+          </div>
+          <div style="flex:1; min-width: 220px;">
+            <label>音声（Voice）</label>
+            <select id="voice"></select>
+          </div>
+        </div>
+
+        <div class="row">
+          <button id="loadVoicesBtn" class="ghost" type="button">🔄 音声を再読み込み</button>
+        </div>
+
+        <div class="row">
+          <div style="flex:1; min-width: 220px;">
+            <label>目次（見出しジャンプ）</label>
+            <select id="toc">
+              <option value="">（プレビュー反映後に選択可能）</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="toggleRow">
+          <label class="toggle"><input type="checkbox" id="autoScroll" checked />自動スクロール</label>
+          <label class="toggle"><input type="checkbox" id="playByBlock" />1ブロックずつ再生</label>
+        </div>
+
+        <div class="row" style="justify-content: space-between;">
+          <span id="status" class="pill">未読み込み</span>
+          <span id="now" class="muted"></span>
+        </div>
+
+        <div class="progress"><div id="bar" class="bar"></div></div>
+        <div class="muted" id="resumeInfo"></div>
+
+        <details>
+          <summary style="cursor:pointer; font-weight:bold; margin:6px 0;">Markdown原文の確認・編集</summary>
+          <textarea id="md" placeholder="Markdownをここに貼り付けるか、ファイルを選択してください"></textarea>
+        </details>
+      </div>
+
+      <div class="card stack">
+        <div class="row" style="justify-content: space-between;">
+          <div class="muted">プレビュー（ブロックをタップするとそこから再生）</div>
+          <span class="pill" id="blockInfo">0 blocks</span>
+        </div>
+        <div class="preview" id="preview"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 操作ドック -->
+  <div class="playerDock" id="playerDock">
+    <div class="playerDockInner">
+      <div class="dockRow">
+        <button id="render" class="iconBtn" type="button" title="プレビュー反映">🔄</button>
+        <button id="play" class="iconBtn primary" type="button" title="最初から">⏮</button>
+        <button id="resume" class="iconBtn primary" type="button" title="再生 / 続きから">▶️</button>
+        <button id="nextBlock" class="iconBtn primary hide" type="button" title="次へ">⏭</button>
+        <button id="pause" class="iconBtn" type="button" title="一時停止">⏸</button>
+        <button id="stop" class="iconBtn" type="button" title="停止">⏹</button>
+        <select id="speedSelect" class="speedSelect" title="読み上げ速度"></select>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const el = (id) => document.getElementById(id);
+
+      const fileEl = el("file");
+      const fnameEl = el("fname");
+      const voiceEl = el("voice");
+      const tocEl = el("toc");
+      const autoScrollEl = el("autoScroll");
+      const playByBlockEl = el("playByBlock");
+      const mdEl = el("md");
+      const previewEl = el("preview");
+      const blockInfoEl = el("blockInfo");
+      const renderBtn = el("render");
+      const playBtn = el("play");
+      const resumeBtn = el("resume");
+      const nextBlockBtn = el("nextBlock");
+      const pauseBtn = el("pause");
+      const stopBtn = el("stop");
+      const statusEl = el("status");
+      const nowEl = el("now");
+      const barEl = el("bar");
+      const speedSelectEl = el("speedSelect");
+      const resumeInfoEl = el("resumeInfo");
+      const loadVoicesBtn = el("loadVoicesBtn");
+
+      // 状態管理
+      let blocks = [];
+      let queue = [];
+      let qIndex = 0;
+      let isPlaying = false;
+      let selectedBlockIndex = 0;
+      let isBlockSession = false;
+      let selectedRate = 1.0;
+      const SPEEDS = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0];
+
+      // 速度セレクタ初期化
+      function buildSpeedSelect() {
+        speedSelectEl.innerHTML = "";
+        for (const v of SPEEDS) {
+          const opt = document.createElement("option");
+          opt.value = String(v);
+          opt.textContent = `${v}x`;
+          if (v === selectedRate) opt.selected = true;
+          speedSelectEl.appendChild(opt);
+        }
+      }
+      speedSelectEl.addEventListener("change", () => {
+        selectedRate = parseFloat(speedSelectEl.value) || 1.0;
+      });
+      buildSpeedSelect();
+
+      // 音声一覧取得
+      function loadVoices() {
+        const voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+        voiceEl.innerHTML = "";
+        const ja = voices.filter(v => (v.lang || "").toLowerCase().startsWith("ja"));
+        const list = ja.length ? ja : voices;
+        list.forEach(v => {
+          const opt = document.createElement("option");
+          opt.value = v.name;
+          opt.textContent = `${v.name} (${v.lang})`;
+          voiceEl.appendChild(opt);
+        });
+      }
+      if (typeof speechSynthesis !== "undefined") {
+        speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+      }
+      loadVoicesBtn.addEventListener("click", () => {
+        loadVoices();
+        statusEl.textContent = "音声を再読み込みしました";
+      });
+
+      // Markdown パース
+      function mdToBlocks(md) {
+        const lines = (md || "").replace(/\r\n/g, "\n").split("\n");
+        const res = [];
+        let buf = [];
+
+        const flushP = () => {
+          const t = buf.join(" ").trim();
+          if (t) res.push({ type: "p", raw: t });
+          buf = [];
+        };
+
+        for (let line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) { flushP(); continue; }
+          const hm = trimmed.match(/^(#{1,6})\s+(.*)$/);
+          if (hm) {
+            flushP();
+            res.push({ type: "h", level: hm[1].length, raw: hm[2] });
+            continue;
+          }
+          if (/^[-*+]\s+/.test(trimmed)) {
+            flushP();
+            res.push({ type: "p", raw: trimmed.replace(/^[-*+]\s+/, "") });
+            continue;
+          }
+          buf.push(trimmed);
+        }
+        flushP();
+        return res;
+      }
+
+      function cleanText(s) {
+        return (s || "").replace(/[*_`#]/g, "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").trim();
+      }
+
+      function renderPreview() {
+        blocks = mdToBlocks(mdEl.value);
+        previewEl.innerHTML = "";
+        tocEl.innerHTML = '<option value="">目次を選択…</option>';
+
+        blocks.forEach((b, idx) => {
+          const div = document.createElement("div");
+          div.className = "block";
+          div.dataset.b = String(idx);
+
+          const txt = cleanText(b.raw);
+          if (b.type === "h") {
+            const h = document.createElement("h3");
+            h.className = b.level <= 2 ? "h1" : "h2";
+            h.textContent = txt;
+            div.appendChild(h);
+
+            const opt = document.createElement("option");
+            opt.value = String(idx);
+            opt.textContent = `${"　".repeat(Math.max(0, b.level - 2))}${txt}`;
+            tocEl.appendChild(opt);
+          } else {
+            const p = document.createElement("p");
+            p.className = "p";
+            p.textContent = txt;
+            div.appendChild(p);
+          }
+
+          div.addEventListener("click", () => {
+            selectedBlockIndex = idx;
+            highlightBlock(idx, true);
+            if (playByBlockEl.checked) {
+              playSingleBlock(idx);
+            } else {
+              playFromBlock(idx);
+            }
+          });
+
+          previewEl.appendChild(div);
+        });
+
+        blockInfoEl.textContent = `${blocks.length} blocks`;
+        statusEl.textContent = "プレビュー反映完了";
+      }
+
+      function highlightBlock(idx, doScroll) {
+        previewEl.querySelectorAll(".block.active").forEach(n => n.classList.remove("active"));
+        const target = previewEl.querySelector(`.block[data-b="${idx}"]`);
+        if (!target) return;
+        target.classList.add("active");
+        if (doScroll && autoScrollEl.checked) {
+          target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      }
+
+      function buildQueueFrom(startIndex) {
+        const q = [];
+        for (let i = startIndex; i < blocks.length; i++) {
+          const t = cleanText(blocks[i].raw);
+          if (t) q.push({ blockIndex: i, text: t, isHeading: blocks[i].type === "h" });
+        }
+        return q;
+      }
+
+      function speakNext() {
+        if (!isPlaying) return;
+        if (qIndex >= queue.length) {
+          isPlaying = false;
+          statusEl.textContent = "再生完了";
+          nowEl.textContent = "";
+          barEl.style.width = "100%";
+          return;
+        }
+
+        const item = queue[qIndex];
+        const utter = new SpeechSynthesisUtterance(item.text);
+        utter.rate = selectedRate;
+
+        const voices = speechSynthesis.getVoices();
+        const v = voices.find(x => x.name === voiceEl.value);
+        if (v) utter.voice = v;
+
+        utter.onstart = () => {
+          statusEl.textContent = "再生中";
+          nowEl.textContent = item.text.slice(0, 25) + (item.text.length > 25 ? "…" : "");
+          highlightBlock(item.blockIndex, true);
+          barEl.style.width = `${((qIndex + 1) / queue.length) * 100}%`;
+        };
+
+        utter.onend = () => {
+          qIndex++;
+          if (isBlockSession) {
+            isPlaying = false;
+            statusEl.textContent = "ブロック完了";
+            return;
+          }
+          speakNext();
+        };
+
+        utter.onerror = () => {
+          isPlaying = false;
+          statusEl.textContent = "音声エラー";
+        };
+
+        speechSynthesis.speak(utter);
+      }
+
+      function playSingleBlock(idx) {
+        speechSynthesis.cancel();
+        const t = cleanText(blocks[idx]?.raw);
+        if (!t) return;
+        queue = [{ blockIndex: idx, text: t, isHeading: blocks[idx].type === "h" }];
+        qIndex = 0;
+        isPlaying = true;
+        isBlockSession = true;
+        speakNext();
+      }
+
+      function playFromBlock(idx) {
+        speechSynthesis.cancel();
+        queue = buildQueueFrom(idx);
+        qIndex = 0;
+        isPlaying = true;
+        isBlockSession = false;
+        speakNext();
+      }
+
+      // ボタンリスナー
+      renderBtn.addEventListener("click", renderPreview);
+
+      playBtn.addEventListener("click", () => {
+        if (!blocks.length) renderPreview();
+        if (playByBlockEl.checked) {
+          playSingleBlock(0);
+        } else {
+          playFromBlock(0);
+        }
+      });
+
+      resumeBtn.addEventListener("click", () => {
+        if (!blocks.length) renderPreview();
+        if (speechSynthesis.paused) {
+          speechSynthesis.resume();
+          isPlaying = true;
+          statusEl.textContent = "再開";
+        } else {
+          playFromBlock(selectedBlockIndex);
+        }
+      });
+
+      pauseBtn.addEventListener("click", () => {
+        if (speechSynthesis.speaking) {
+          speechSynthesis.pause();
+          isPlaying = false;
+          statusEl.textContent = "一時停止";
+        }
+      });
+
+      stopBtn.addEventListener("click", () => {
+        speechSynthesis.cancel();
+        isPlaying = false;
+        statusEl.textContent = "停止";
+        nowEl.textContent = "";
+      });
+
+      nextBlockBtn.addEventListener("click", () => {
+        if (selectedBlockIndex + 1 < blocks.length) {
+          selectedBlockIndex++;
+          playSingleBlock(selectedBlockIndex);
+        }
+      });
+
+      playByBlockEl.addEventListener("change", () => {
+        nextBlockBtn.classList.toggle("hide", !playByBlockEl.checked);
+      });
+
+      tocEl.addEventListener("change", () => {
+        const idx = parseInt(tocEl.value, 10);
+        if (isNaN(idx)) return;
+        selectedBlockIndex = idx;
+        if (playByBlockEl.checked) {
+          playSingleBlock(idx);
+        } else {
+          playFromBlock(idx);
+        }
+      });
+
+      fileEl.addEventListener("change", async () => {
+        const file = fileEl.files?.[0];
+        if (!file) return;
+        fnameEl.textContent = file.name;
+        mdEl.value = await file.text();
+        renderPreview();
+      });
+    })();
+  </script>
+</body>
+</html>
