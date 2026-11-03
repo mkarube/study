@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ビジネス実務法務検定® 3級 CBT模擬試験システム</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+    body {
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+      user-select: none;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <!-- CBT Exam Top Header -->
+  <header class="bg-slate-900 text-white shadow-md border-b-2 border-blue-600 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center space-x-3">
+        <div class="bg-blue-600 text-white p-2 rounded-lg font-bold flex items-center justify-center shadow-inner">
+          <i class="fa-solid fa-scale-balanced text-lg"></i>
+        </div>
+        <div>
+          <span class="text-xs tracking-wider uppercase text-blue-400 font-semibold block">CBT Examination System</span>
+          <h1 class="font-bold text-base md:text-lg leading-tight tracking-tight">ビジネス実務法務検定® 3級 模擬試験</h1>
+        </div>
+      </div>
+
+      <!-- Action & Timer Section -->
+      <div class="flex items-center space-x-2 md:space-x-4">
+        <!-- Load MD Button -->
+        <button id="open-md-modal-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 px-3 py-1.5 rounded text-xs md:text-sm font-medium transition flex items-center gap-1.5">
+          <i class="fa-solid fa-file-import text-blue-400"></i>
+          <span>MD問題読込</span>
+        </button>
+
+        <!-- Timer Widget (Active during Exam) -->
+        <div id="header-timer-wrap" class="hidden items-center bg-slate-800/90 border border-slate-700 px-3 py-1 rounded-md text-amber-300 font-mono text-sm md:text-base font-bold shadow-inner">
+          <i class="fa-regular fa-clock mr-1.5 text-amber-400 animate-pulse"></i>
+          <span id="header-timer-display">90:00</span>
+        </div>
+
+        <!-- Exit / Reset -->
+        <button id="quit-exam-btn" class="hidden bg-rose-600 hover:bg-rose-500 text-white px-3 py-1.5 rounded text-xs md:text-sm font-medium transition shadow-sm">
+          <i class="fa-solid fa-power-off mr-1"></i> 中断
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 md:p-6 flex flex-col justify-center">
+
+    <!-- VIEW 1: START SCREEN -->
+    <section id="view-start" class="w-full max-w-3xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 p-6 md:p-8 text-white">
+        <div class="inline-block bg-blue-500/30 text-blue-200 text-xs font-semibold px-2.5 py-1 rounded border border-blue-400/30 mb-2">
+          第1章〜第8章 全章網羅・本試験形式
+        </div>
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight">ビジネス実務法務検定® 3級 本格模擬テスト</h2>
+        <p class="text-slate-300 text-sm mt-2">実際のCBT画面構成、ランダムシャッフル、詳細解説、弱点分析機能を搭載したWeb模擬試験です。</p>
+      </div>
+
+      <div class="p-6 md:p-8 space-y-6">
+        <!-- Exam Rules -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div class="bg-slate-50 border border-slate-200 p-3 rounded-lg">
+            <span class="text-xs text-slate-500 block">問題数</span>
+            <span id="start-q-count" class="text-xl font-bold text-slate-800">40問</span>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 p-3 rounded-lg">
+            <span class="text-xs text-slate-500 block">制限時間</span>
+            <span class="text-xl font-bold text-slate-800">90分</span>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 p-3 rounded-lg">
+            <span class="text-xs text-slate-500 block">合格基準</span>
+            <span class="text-xl font-bold text-emerald-600">70点 / 100</span>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 p-3 rounded-lg">
+            <span class="text-xs text-slate-500 block">選択肢順序</span>
+            <span class="text-xl font-bold text-blue-600"><i class="fa-solid fa-shuffle mr-1"></i>ランダム</span>
+          </div>
+        </div>
+
+        <!-- Guidance List -->
+        <div class="bg-blue-50/60 border-l-4 border-blue-600 p-4 rounded text-sm text-slate-700 space-y-2">
+          <p class="font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-circle-info text-blue-600 mr-2"></i> 試験の注意事項・機能仕様
+          </p>
+          <ul class="list-disc list-inside space-y-1 text-xs md:text-sm text-slate-600 ml-1">
+            <li>各設問の選択肢は、開始時に<strong>自動シャッフル</strong>されます。</li>
+            <li>問題パレットからいつでも任意の問題へ移動できます。</li>
+            <li>自信のない問題には「<i class="fa-solid fa-bookmark text-amber-500"></i> 後で見直す」フラグを付与可能です。</li>
+            <li>「Markdown問題読込」機能から、ご自身で用意した問題データを読み込ませてテストすることも可能です。</li>
+            <li>試験終了後、即座に採点と章別正答率、全問の詳細な解説が表示されます。</li>
+          </ul>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+          <button id="start-exam-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-lg text-base shadow-md hover:shadow transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-play"></i>
+            <span>模擬試験を開始する</span>
+          </button>
+          <button id="preview-preset-md-btn" class="sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3.5 px-5 rounded-lg text-sm border border-slate-300 transition flex items-center justify-center gap-2">
+            <i class="fa-regular fa-file-lines text-slate-500"></i>
+            <span>Markdownの構文を確認</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: CBT EXAM SCREEN -->
+    <section id="view-exam" class="hidden flex-col gap-4 w-full h-full">
+      <!-- Status Bar -->
+      <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-3 flex flex-wrap justify-between items-center gap-3">
+        <div class="flex items-center gap-2">
+          <span class="bg-blue-600 text-white font-bold text-sm px-2.5 py-1 rounded">
+            問 <span id="current-q-index-badge">1</span> / <span id="total-q-count-badge">40</span>
+          </span>
+          <span id="current-q-chapter" class="text-xs md:text-sm font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2 py-1 rounded">
+            第2章 取引を行う主体
+          </span>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="flex items-center gap-3 text-xs md:text-sm">
+          <span class="text-slate-600">解答状況: <strong id="answered-count" class="text-blue-600">0</strong> / <span id="total-count-label">40</span></span>
+          <div class="w-24 md:w-40 bg-slate-200 rounded-full h-2.5 overflow-hidden">
+            <div id="exam-progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+          <button id="flag-toggle-btn" class="border border-slate-300 hover:bg-amber-50 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition text-slate-700">
+            <i class="fa-regular fa-bookmark text-slate-400" id="flag-icon"></i>
+            <span id="flag-text">見直しチェック</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Question & Choice Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        <!-- Left: Question Body & Options (8 cols) -->
+        <div class="lg:col-span-8 flex flex-col gap-4">
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 md:p-7 min-h-[380px] flex flex-col justify-between">
+            <div>
+              <!-- Question Text -->
+              <div class="mb-5">
+                <div class="flex items-start gap-2">
+                  <span class="text-blue-600 font-extrabold text-lg mt-0.5">Q.</span>
+                  <div id="question-text" class="text-base md:text-lg font-medium leading-relaxed text-slate-800">
+                    問題文がここに入ります。
+                  </div>
+                </div>
+              </div>
+
+              <!-- Options (Radio-style cards) -->
+              <div id="options-container" class="space-y-3">
+                <!-- Dynamically generated options -->
+              </div>
+            </div>
+
+            <!-- Hint / Status subtext -->
+            <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400">
+              <span>※ 選択肢をクリックまたはタップして解答を選択してください。</span>
+              <span id="q-type-badge" class="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-600">4択多肢選択</span>
+            </div>
+          </div>
+
+          <!-- Bottom Control Bar -->
+          <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-3 flex justify-between items-center">
+            <button id="prev-q-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 rounded text-sm transition flex items-center gap-1.5 border border-slate-300">
+              <i class="fa-solid fa-chevron-left text-xs"></i> 前の問題
+            </button>
+
+            <button id="finish-exam-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded text-sm transition shadow-sm flex items-center gap-2">
+              <i class="fa-solid fa-flag-checkered"></i> 試験を終了して採点する
+            </button>
+
+            <button id="next-q-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded text-sm transition flex items-center gap-1.5 shadow-sm">
+              次の問題 <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Question Navigation Palette (4 cols) -->
+        <div class="lg:col-span-4 bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+          <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
+            <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-table-cells text-blue-600"></i> 問題一覧パレット
+            </h3>
+            <span class="text-xs text-slate-400">クリックで移動</span>
+          </div>
+
+          <!-- Legend -->
+          <div class="flex flex-wrap items-center gap-2 text-[11px] mb-3 text-slate-600 pb-2 border-b border-slate-100">
+            <div class="flex items-center gap-1">
+              <span class="w-3.5 h-3.5 bg-blue-600 rounded text-white inline-block"></span> 解答済
+            </div>
+            <div class="flex items-center gap-1">
+              <span class="w-3.5 h-3.5 bg-white border border-slate-300 rounded inline-block"></span> 未解答
+            </div>
+            <div class="flex items-center gap-1">
+              <span class="w-3.5 h-3.5 bg-amber-400 rounded inline-block"></span> 見直し
+            </div>
+            <div class="flex items-center gap-1">
+              <span class="w-3.5 h-3.5 ring-2 ring-blue-500 rounded inline-block"></span> 現在
+            </div>
+          </div>
+
+          <!-- Palette Buttons Grid -->
+          <div id="question-palette-grid" class="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-2 max-h-[380px] overflow-y-auto custom-scroll p-1">
+            <!-- Dynamically populated 1..40 -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: RESULT & REVIEW SCREEN -->
+    <section id="view-result" class="hidden flex-col gap-6 w-full max-w-5xl mx-auto">
+      <!-- Score Overview Card -->
+      <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+        <div id="result-hero-bg" class="p-6 md:p-8 text-white flex flex-col md:flex-row justify-between items-center gap-6">
+          <div class="text-center md:text-left">
+            <span id="result-status-badge" class="inline-block text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+              RESULT
+            </span>
+            <h2 id="result-verdict-title" class="text-2xl md:text-4xl font-extrabold tracking-tight">合格おめでとうございます！</h2>
+            <p id="result-verdict-desc" class="text-sm mt-1 text-slate-200">ビジネス実務法務検定3級の合格基準（70点以上）をクリアしました。</p>
+          </div>
+
+          <!-- Score circle / badge -->
+          <div class="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-2xl flex items-center gap-6 shadow-inner text-center">
+            <div>
+              <span class="text-xs uppercase text-slate-300 block">総合得点</span>
+              <div class="text-4xl md:text-5xl font-black font-mono">
+                <span id="final-score-val">0</span><span class="text-lg font-normal text-slate-300">/100点</span>
+              </div>
+            </div>
+            <div class="border-l border-white/20 pl-6">
+              <span class="text-xs uppercase text-slate-300 block">正解数</span>
+              <div class="text-2xl md:text-3xl font-bold font-mono">
+                <span id="final-correct-count">0</span><span class="text-sm font-normal text-slate-300"> / <span id="final-total-count">40</span>問</span>
+              </div>
+              <span class="text-xs text-slate-300" id="final-accuracy-percent">正答率: 0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chapter-wise Performance -->
+        <div class="p-5 md:p-6 bg-slate-50 border-t border-slate-200">
+          <h3 class="font-bold text-slate-800 text-sm md:text-base mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-blue-600"></i> 章別の成績分析
+          </h3>
+          <div id="chapter-stats-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            <!-- Dynamically populated chapter badges -->
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="p-4 bg-white border-t border-slate-200 flex flex-wrap justify-between items-center gap-3">
+          <div class="flex gap-2">
+            <button id="filter-all-btn" class="review-filter-btn active bg-blue-600 text-white text-xs font-semibold px-3 py-1.5 rounded transition">
+              全問表示
+            </button>
+            <button id="filter-wrong-btn" class="review-filter-btn bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded transition">
+              間違えた問題のみ
+            </button>
+            <button id="filter-flagged-btn" class="review-filter-btn bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded transition">
+              見直しフラグのみ
+            </button>
+          </div>
+
+          <div class="flex gap-2">
+            <button id="retry-exam-btn" class="bg-blue-600 hover:bg-blue-700 text-white text-xs md:text-sm font-bold px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-1.5">
+              <i class="fa-solid fa-rotate-right"></i> 選択肢を再シャッフルして再受験
+            </button>
+            <button id="back-home-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs md:text-sm font-medium px-4 py-2 rounded-lg transition">
+              トップへ戻る
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Review List -->
+      <div class="space-y-4">
+        <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-book-open text-blue-600"></i> 解答と詳細解説
+        </h3>
+        <div id="review-questions-list" class="space-y-4">
+          <!-- Dynamically populated review cards with explanations -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Markdown Import & Format Specification Modal -->
+  <div id="md-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div class="bg-slate-900 text-white px-5 py-3.5 flex justify-between items-center">
+        <div class="flex items-center gap-2 font-bold text-sm md:text-base">
+          <i class="fa-solid fa-file-code text-blue-400"></i>
+          <span>Markdown形式の問題をインポート</span>
+        </div>
+        <button id="close-md-modal-btn" class="text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto custom-scroll space-y-4 text-xs md:text-sm text-slate-700">
+        <div>
+          <label class="block font-bold text-slate-800 mb-1">
+            Markdownファイル（.md, .txt）をアップロード:
+          </label>
+          <input type="file" id="md-file-input" accept=".md,.txt" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-slate-200 rounded-lg p-1"/>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block font-bold text-slate-800">
+              または、Markdownテキストを直接貼り付け:
+            </label>
+            <button id="load-sample-md-btn" class="text-blue-600 hover:underline text-xs">
+              現在の内蔵40問テンプレートを挿入
+            </button>
+          </div>
+          <textarea id="md-textarea" rows="8" placeholder="### 問1 [第2章 取引を行う主体]
+問題文がここに入ります。
+- [ ] 選択肢1
+- [x] 正解の選択肢（[x]を付ける）
+- [ ] 選択肢3
+- [ ] 選択肢4
+> 解説: ここに詳しい法的根拠や理由を記述します。" class="w-full font-mono text-xs p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"></textarea>
+        </div>
+
+        <!-- Format Rules Reference -->
+        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1">
+          <span class="font-bold text-slate-800 block mb-1">📝 Markdown 記法ルール</span>
+          <p>• <code>### 問[番号] [章名]</code> または <code>## 問○</code> で問題を区切ります。</p>
+          <p>• 選択肢は <code>- [ ] 選択肢文</code> （不正解）と <code>- [x] 選択肢文</code> （正解）で記述します。</p>
+          <p>• <code>> 解説: ...</code> または <code>> 解説 ...</code> で解説文を記載できます（複数行可）。</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-100 px-5 py-3 border-t border-slate-200 flex justify-end gap-2">
+        <button id="cancel-md-btn" class="px-4 py-2 rounded text-xs font-medium text-slate-600 hover:bg-slate-200 transition">
+          キャンセル
+        </button>
+        <button id="apply-md-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-check"></i> 読み込んで適用する
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white text-xs md:text-sm px-4 py-3 rounded-lg shadow-xl border border-slate-700 flex items-center gap-2 transform transition-all duration-300">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toast-msg">通知メッセージ</span>
+  </div>
+
+  <!-- Built-in 40 Questions Dataset (Complete 8 Chapters Coverage) & Application Logic -->
+  <script>
+    /* =====================================================================
+       1. DEFAULT PRESET QUESTION DATASET (40 QUESTIONS - CHAPTERS 1-8 COVERAGE)
+       ===================================================================== */
+    const DEFAULT_PRESET_MARKDOWN = `
+### 問1 [第1章 ビジネス実務法務の法体系]
+民法および近代私法の基本原則に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 所有権絶対の原則は憲法上も保障されているため、いかなる場合も公共の福祉による法的な制約を受けることはない。
+- [x] 過失責任主義とは故意または過失がなければ損害賠償責任を負わない原則であるが、製造物責任法（PL法）などでは被害者救済のために無過失責任が導入されている。
+- [ ] 私的自治の原則に基づき、当事者が合意すれば、強行法規に反する特約であっても法律の規定に常に優先して有効となる。
+- [ ] 権利能力平等の原則により、胎児は出生前であっても、いかなる権利関係においてもすでに生まれたものとみなされる。
+> 解説: 近代私法では「過失責任主義」が原則ですが、現代のビジネス社会では被害者保護のため、製造物責任法（PL法）や土地工作物責任（所有者責任）などにおいて過失を要件としない「無過失責任」へと修正されています。所有権は公共の福祉による制限を受け、強行法規に反する合意は無効です。また胎児は相続・不法行為等の一部例外を除き出生前には権利能力を有しません。
+
+### 問2 [第1章 ビジネス実務法務の法体系]
+法律の適用関係および裁判手続に関する次の記述のうち、最も不適切なものはどれか。
+- [ ] 一般法と特別法に異なる規定がある場合、特別法が一般法に優先して適用されるため、商法は民法に優先する。
+- [ ] 取締法規に違反して締結された契約は、行政上の制裁を受けることはあっても、私法上の効力まで直ちに無効となるわけではない。
+- [x] 権利侵害を受けた債権者は、裁判手続を経ることなく、実力を用いて債務者の財産を差し押さえる「自力救済」を行うことが原則として認められている。
+- [ ] 第一審の判決に不服がある場合は上級裁判所に控訴し、第二審（控訴審）の判決に不服がある場合はさらに上告を申し立てることができる。
+> 解説: 法治国家においては、国家機関による救済を待たずに私人自らの実力で権利を実現する「自力救済」は原則として禁止されています。裁判手続（訴訟や民事執行）を経て強制執行を行う必要があります。
+
+### 問3 [第1章 ビジネス実務法務の法体系]
+民事紛争の解決手続（ADR等）に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 裁判上の和解が成立した場合であっても、確定判決のような債務名義としての執行力は生じない。
+- [x] 仲裁手続において下された仲裁判断は、裁判所の確定判決と同一の効力を有する。
+- [ ] 調停委員会から提示された調停案は、当事者の一方が不同意であっても強制的に調停が成立する。
+- [ ] 簡易裁判所で行われる少額訴訟手続は、訴額が140万円以下の金銭の支払請求を対象としている。
+> 解説: 仲裁合意に基づいて仲裁人が下した仲裁判断は、確定判決と同一の効力を有します。調停は当事者の合意が不可欠であり不同意なら不成立となります。少額訴訟は「60万円以下」の金銭請求が対象です（140万円以下は簡易裁判所の通常の民事訴訟管轄）。
+
+### 問4 [第1章 ビジネス実務法務の法体系]
+企業の社会的責任（CSR）およびコンプライアンスに関する次の記述のうち、最も不適切なものはどれか。
+- [ ] 現代のビジネスにおけるコンプライアンスは、法律や政省令などの法令遵守にとどまらず、社内規程や社会規範、企業倫理に沿った行動までを含む。
+- [ ] コーポレート・ガバナンス（企業統治）とは、不祥事の防止や効率的な経営を目指し、企業活動を統制・監視する仕組みをいう。
+- [x] 法令に違反していなければ、社会規範や企業倫理に著しく反する企業活動であっても、コンプライアンス上の問題が生じることはない。
+- [ ] SDGs（持続可能な開発目標）への積極的な取り組みは、企業の社会的評価や長期的な持続可能性を高めるものとして重視されている。
+> 解説: コンプライアンス（法令等遵守）は、形式的な法令の文言を守るだけでなく、その立法趣旨や背景にある健全な社会規範・企業倫理に即した行動を取ることを求めています。
+
+### 問5 [第2章 取引を行う主体・会社法]
+意思能力および行為能力に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 泥酔や重度の認知症など意思能力を一時的に欠く状態で行われた売買契約は、後から取り消すことができる行為として扱われる。
+- [ ] 成年被後見人が、成年後見人の事前の同意を得て行った不動産の売買契約は、後から取り消すことができない。
+- [x] 未成年者が法定代理人の同意を得ずに高額な物品を購入した場合であっても、日用品の購入その他日常生活に関する行為であれば取り消すことができない。
+- [ ] 制限行為能力者が、相手方に「私は成年者である」と口頭で述べただけであれば、それだけで直ちに詐術に該当し、取消権は完全に排除される。
+> 解説: 意思無能力者の法律行為は取消しではなく「初めから当然に無効」です。また、成年後見人には同意権がないため同意があっても取り消せます。未成年者であっても単なる日常行為や日用品の購入は取り消せません。口頭で単に言っただけでは詐術と認められない場合が多く、欺罔の積極的企図が必要です。
+
+### 問6 [第2章 取引を行う主体・会社法]
+制限行為能力者の相手方の保護に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 制限行為能力者と取引をした相手方は、本人が行為能力者となった後であっても、本人に対して追認するかどうかの催告をすることはできない。
+- [x] 制限行為能力者と契約を締結した相手方は、契約の締結時に相手が制限行為能力者であることを知らなかった（善意であった）場合、追認があるまでは契約を取り消すことができる。
+- [ ] 被保佐人が保佐人の同意を得ずにした行為について、相手方が保佐人に対して1か月以上の期間を定めて追認するか催告し、確答がなかった場合は追認したものとみなされる。
+- [ ] 制限行為能力者が相手方を騙す目的で成年者であると偽るなど「詐術」を用いた場合であっても、保護の必要性から取消権を行使できる。
+> 解説: 契約時に善意であった相手方は、追認前であれば契約を取り消すことができます（悪意の相手方は催告権のみ）。保佐人が期間内に確答を発しない場合は「追認を拒絶したもの」とみなされます。詐術を用いた場合は取消権が排除されます。
+
+### 問7 [第2章 取引を行う主体・会社法]
+代理制度に関する次の記述のうち、民法の規定に照らし最も適切なものはどれか。
+- [ ] 代理人が本人のためにすることを示さずに契約を結んだ場合（顕名のない場合）、相手方が代理人として行動していることを知っていたとしても、本人に効力は及ばない。
+- [ ] 本人の許諾がない限り、代理人が自己の利益のために相手方となって契約する「自己契約」は、常に確定的に有効である。
+- [x] 無権代理人が締結した契約について、相手方が契約時に無権代理であることを知っていた（悪意であった）場合であっても、本人に対して追認するかどうかを催告することができる。
+- [ ] 表見代理が成立する場合、取引の相手方に過失があっても、常に本人は契約の責任を負わなければならない。
+> 解説: 無権代理の相手方は、悪意であっても「追認するかどうかの催告権」を有します（取消権は善意者のみ）。顕名がなくても相手方が悪意・有過失なら本人に効力が帰属します。自己契約は原則無権代理です。表見代理の成立には相手方の「善意無過失」が必要です。
+
+### 問8 [第2章 取引を行う主体・会社法]
+商法上の商行為の特則に関する次の記述のうち、最も不適切なものはどれか。
+- [ ] 当事者の一方にとって商行為となる取引（一方的商行為）については、双方に商法の規定が適用される。
+- [ ] 商人がその営業の範囲内において他人のために行為をしたときは、特約がなくても相当な報酬を請求することができる。
+- [ ] 商人間の金銭消費貸借契約においては、利息に関する特約がなくても、貸主は法定利率による利息を請求できる。
+- [x] 数人の者が共同してその一人または全員のために商行為となる債務を負担した場合、特約がなければ各自が均等に債務を分担する分割債務となる。
+> 解説: 民法では多数当事者の債務は「分割債務」が原則ですが、商法では取引の安全と迅速な債権回収を図るため、原則として当然に「連帯債務」となります。
+
+### 問9 [第2章 取引を行う主体・会社法]
+商号および商業登記に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 自己の商号を使用して営業を行うことを他人に許諾した名板貸人は、名板借人が行った取引について何らの連帯責任も負わない。
+- [x] 会社の支配人は、会社に代わってその事業に関する一切の裁判上および裁判外の行為をする包括的な代理権を有する。
+- [ ] 商業登記簿に登記された事項は、正当な事由によりその登記を知らなかった善意の第三者に対しても、常に例外なく対抗できる。
+- [ ] 株式会社は、定款を作成して公証人の認証を受けた時点で法人として成立する。
+> 解説: 支配人は包括的代理権（事業に関する裁判上・裁判外の一切の行為）を有します。名板貸人は連帯弁済責任を負います。商業登記の積極的公示力には善意の第三者保護（正当な事由）の例外があります。会社は「本店の所在地で設立の登記」をすることによって成立します。
+
+### 問10 [第2章 取引を行う主体・会社法]
+会社法上の各種会社の形態に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 合名会社の社員は、会社債権者に対して出資額を限度とする間接有限責任のみを負う。
+- [x] 合同会社（LLC）の社員は全員が間接有限責任を負い、定款によって利益の配当や意思決定の権限を柔軟に設計できる。
+- [ ] 合資会社は、無限責任社員のみによって構成される会社形態である。
+- [ ] 株式会社の株主は、会社の負債について直接に債権者に対して弁済の無限責任を負う。
+> 解説: 合同会社（持分会社）の社員は全員が間接有限責任であり、出資比率にとらわれない柔軟な内部自治が認められています。合名会社は社員全員が直接無限責任、合資会社は無限責任社員と有限責任社員で構成されます。株式会社の株主は間接有限責任です。
+
+### 問11 [第2章 取引を行う主体・会社法]
+株式会社の機関および株式に関する次の記述のうち、最も不適切なものはどれか。
+- [ ] 株式会社において、株式の譲渡を制限するには定款にその旨の定めを置く必要があり、何らの制限もない場合は株式譲渡自由の原則が妥当する。
+- [ ] 取締役会設置会社においては、取締役は3人以上でなければならず、監査役等の設置が義務付けられる。
+- [x] 取締役会設置会社における株主総会は、会社の業務執行に関する一切の事項を自由に決定することができる。
+- [ ] 取締役が会社の事業の部類に属する取引を自己のために行う場合（競業取引）、取締役会等の承認を受けなければならない。
+> 解説: 取締役会設置会社における株主総会は、会社法に規定する事項および定款で定めた事項「のみ」決議できます。日常的な業務執行の決定権限は取締役会にあります。
+
+### 問12 [第3章 法人取引の法務・契約・債権]
+意思表示の瑕疵および無効・取消しに関する次の記述のうち、最も適切なものはどれか。
+- [ ] 真意でないことを自ら知りつつ行った意思表示（心裡留保）は、相手方がその真意でないことを知っていた（悪意であった）場合でも常に有効である。
+- [ ] 相手方と通謀して行った虚偽の意思表示（通謀虚偽表示）の無効は、善意・無過失の第三者であっても対抗することができる。
+- [x] 詐欺による意思表示の取消しは善意でかつ過失がない第三者に対抗できないが、強迫による意思表示の取消しは善意・無過失の第三者に対しても対抗できる。
+- [ ] 法律行為の要素に錯誤があった場合、表意者に重大な過失があったときでも、表意者は常に何らの制限もなく取り消すことができる。
+> 解説: 詐欺による取消しは「善意無過失の第三者」に対抗できませんが、強迫は被害者の保護を重視するため「善意無過失の第三者」に対しても対抗できます。心裡留保は相手方が悪意または有過失なら無効です。通謀虚偽表示の無効は善意の第三者に対抗できません。錯誤は重過失があれば原則取消不可です。
+
+### 問13 [第3章 法人取引の法務・契約・債権]
+契約の成立および契約書に関する次の記述のうち、最も適切なものはどれか。
+- [x] 民法上の契約は、当事者間の合意（申込みと承諾の合致）のみによって有効に成立する諾成契約が原則であり、書面の作成は成立要件ではない。
+- [ ] 契約書に当事者の署名または押印がなされていない場合、いかなる場合も当事者間に契約上の権利義務は一切発生しない。
+- [ ] 契約期間の計算において、「契約締結の日から1か月」と定めた場合、初日は常に参入して計算される。
+- [ ] 契約書に貼付する収入印紙の貼付を怠った場合、印紙税法上の過怠税が課されるだけでなく、契約自体の民法上の私法的効力も無効となる。
+> 解説: 日本の民法では意思表示の合致のみで契約が成立する「諾成契約」が原則です。印紙税の未納は税法上の問題（過怠税等）であり、契約の法的効力自体は有効です。期間計算は原則「初日不算入」です。
+
+### 問14 [第3章 法人取引の法務・契約・債権]
+手付および契約解除に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 解約手付が交付された場合、買主は売主が履行に着手した後であっても、交付した手付金を放棄すれば自由に契約を解除できる。
+- [x] 解約手付が交付された売買契約において、相手方が履行に着手するまでは、買主は手付を放棄し、売主は手付の倍額を現実に提供して契約を解除できる。
+- [ ] 手付解除がなされた場合、手付の放棄や倍戻しに加えて、債務不履行を理由とする損害賠償請求を別途行うことができる。
+- [ ] 当事者が特に定めを置かずに手付を交付した場合、その手付は当然に「違約手付」と推定される。
+> 解説: 解約手付による解除は「相手方が履行に着手するまで」の間、買主は手付放棄、売主は手付倍額の現実の提供により可能です。手付解除の場合、損害賠償請求はできません。手付は別段の合意がなければ「解約手付」と推定されます。
+
+### 問15 [第3章 法人取引の法務・契約・債権]
+売買契約における売主の契約不適合責任に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 引き渡された目的物の種類や品質に不適合があった場合、買主が請求できるのは損害賠償請求に限られ、追完請求（修補・代替物引渡）は認められない。
+- [ ] 目的物の不適合を理由として契約の解除をする場合、売主に故意または過失（帰責事由）がなければ解除することはできない。
+- [x] 目的物の種類または品質に関する不適合について、買主はその不適合を知った時から1年以内に売主に通知しなければ、原則として追完や代金減額を請求できなくなる。
+- [ ] 商人間の売買であっても、買主は目的物の受領後に検査を行う義務はなく、民法と同様に知った時から1年以内に通知すればよい。
+> 解説: 目的物の種類・品質の不適合については、買主が「知った時から1年以内」に売主に通知する必要があります。契約解除には売主の帰責事由は不要です（損害賠償には必要）。商人間の売買では受領後遅滞なく検査・通知する義務があります。
+
+### 問16 [第3章 法人取引の法務・契約・債権]
+典型契約（請負・委任・賃貸借）に関する次の記述のうち、最も不適切なものはどれか。
+- [ ] 請負契約は仕事の「完成」に対して報酬が支払われるのに対し、委任契約は事務の処理そのものを委託する契約である。
+- [ ] 委任契約における受任者は、委任の本旨に従い、善良な管理者の注意をもって委任事務を処理する義務（善管注意義務）を負う。
+- [x] 建物の賃借人が賃貸人の承諾を得ずに第三者に当該建物を転貸（また貸し）した場合、賃借人と転借人の間の転貸借契約は初めから当然に無効である。
+- [ ] 金銭消費貸借契約は、借主が金銭を受け取り、後日それと同額の金銭を返還することを約することによって効力を生ずる。
+> 解説: 賃貸人に無断で転貸した場合でも、賃借人と転借人の間の転貸借契約そのものは「当事者間では有効」に成立します。ただし賃貸人に対抗できず、賃貸人は賃貸借契約を解除できます。
+
+### 問17 [第3章 法人取引の法務・契約・債権]
+不法行為および特別法上の責任に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 土地の工作物の設置または保存の瑕疵によって他人に損害が生じた場合、その工作物の「所有者」は必要な注意を払っていたことを証明すれば損害賠償責任を免れる。
+- [ ] 製造物責任法（PL法）における欠陥によって「当該製造物自体のみ」に損害が生じた場合（他の財産被害なし）、PL法に基づく賠償を請求できる。
+- [x] 従業員が事業の執行につき第三者に損害を加えた場合、使用者（会社）は原則として使用者責任に基づき損害賠償責任を負う。
+- [ ] 一般不法行為に基づく損害賠償請求権の消滅時効は、被害者が損害および加害者を知った時から「10年間」である。
+> 解説: 使用者責任（民法715条）により、被用者が事業執行について加えた損害は使用者が賠償する責任を負います。土地工作物の「所有者」は無過失責任です（占有者は免責あり）。PL法は製造物自体の損害（固有欠陥損害）のみの場合は対象外です。不法行為の時効は知った時から原則3年（生命身体は5年）です。
+
+### 問18 [第4章 法人財産の管理と法律・知的財産権]
+不動産の物権変動および登記に関する次の記述のうち、最も適切なものはどれか。
+- [x] 同一の不動産が二重に譲渡された場合、双方の買主間の優劣は、契約の先後ではなく、原則として先に所有権移転登記を備えたかどうかによって決まる。
+- [ ] 日本の不動産登記制度には公信力が認められているため、無権利者の登記名義を信じて取引した善意の第三者は、確定的に所有権を取得できる。
+- [ ] 不動産の二重譲渡において、先に買い受けた事実を知っている「悪意の買主」は、背信的悪意者でなくても先に登記を備えても所有権を対抗できない。
+- [ ] 相続によって不動産の所有権を取得した場合であっても、登記を申請するかどうかは完全に任意であり、法律上の申請義務は存在しない。
+> 解説: 不動産の物権変動は登記が対抗要件であり、登記の先後で決まります。単なる悪意者であっても登記が早ければ勝ちます（背信的悪意者のみ排除）。登記に公信力はありません。また、法改正により相続登記は申請が義務化されています。
+
+### 問19 [第4章 法人財産の管理と法律・知的財産権]
+動産の物権変動および即時取得に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 動産を善意・無過失で平穏・公然と買い受けて引き渡された場合であっても、相手方が無権利者であれば所有権を取得することは一切できない。
+- [x] 動産の即時取得が成立するための引渡しには、売主が引き続き目的物を手元で保管し続ける「占有改定」による引渡しは含まれない。
+- [ ] 盗品や遺失物を買い受けた場合、善意・無過失の買主であっても、被害者は盗難・遺失の時から10年間は無償で回復を請求できる。
+- [ ] 即時取得は、動産だけでなく土地や建物などの不動産取引にも広く適用される。
+> 解説: 即時取得（民法192条）では、外見的な支配状態の変化を伴わない「占有改定」による引渡しでは即時取得が成立しません（判例）。盗品等の回復請求期間は「2年間」です。また不動産には即時取得は適用されません。
+
+### 問20 [第4章 法人財産の管理と法律・知的財産権]
+知的財産権の保護対象および要件に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 特許権は、特許庁への出願や審査を経ることなく、新しい発明を完成させた時点で自動的に権利が発生する。
+- [ ] 実用新案権は、物品の形状・構造に関する考案だけでなく、プログラムや食品の製造方法なども幅広く登録の対象としている。
+- [x] 商標権の存続期間は設定登録の日から10年であるが、更新登録の申請を繰り返すことによって、半永久的に存続させることができる。
+- [ ] 著作権法が保護する著作権（財産権）および著作者人格権は、いずれも契約によって自由に第三者へ譲渡することができる。
+> 解説: 商標は信用を化体する権利であるため、10年ごとの更新登録により半永久的に権利を維持できます。特許権は登録主義です。実用新案は「物品の形状・構造・組合せ」に限られ、方法は対象外です。著作者人格権は一身専属権であり譲渡できません。
+
+### 問21 [第4章 法人財産の管理と法律・知的財産権]
+著作権および不正競争防止法に関する次の記述のうち、最も不適切なものはどれか。
+- [ ] 著作権は、創作された時点でいかなる申請・登録も要さずに自動的に発生する（無方式主義）。
+- [ ] 従業員が職務上作成したプログラム等の職務著作について、別段の定めがない限り、法人名義で公表するものは法人が著作者となる。
+- [x] 不正競争防止法における「営業秘密」として保護されるには、「秘密管理性」と「有用性」を満たしていれば足り、公然と知られていないこと（非公知性）までは要求されない。
+- [ ] 他人の周知な商品等表示と同一または類似の表示を使用して混同を生じさせる行為は、不正競争防止法上の不正競争行為に該当する。
+> 解説: 不正競争防止法上の営業秘密として保護されるには、「秘密管理性」「有用性」「非公知性」の3要件を【すべて】満たす必要があります。
+
+### 問22 [第5章 債権の管理と回収・担保・時効・倒産]
+保証および連帯保証に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 保証契約は、口頭の合意のみであっても当事者の信頼関係に基づいて有効に成立する。
+- [ ] 通常の保証人は、債権者から請求を受けた場合でも、「まず主債務者に請求せよ」と主張する催告の抗弁権を有しない。
+- [x] 連帯保証人は、通常の保証人と異なり、催告の抗弁権および検索の抗弁権のいずれも有しないため、請求を受ければ直ちに弁済に応じなければならない。
+- [ ] 商人間で行われた債務の保証であっても、特約がなければ通常の保証となり、連帯保証とはならない。
+> 解説: 連帯保証人には、まず主債務者に請求しろという「催告の抗弁権」も、主債務者の財産から執行しろという「検索の抗弁権」もありません。保証契約は書面または電磁的記録が必須です。商人間の保証は原則として「連帯保証」となります。
+
+### 問23 [第5章 債権の管理と回収・担保・時効・倒産]
+担保物権（抵当権・留置権等）に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 留置権は、当事者間の合意（契約）によって設定される約定担保物権であり、物上代位性が認められている。
+- [x] 抵当権は、目的物の占有を債務者の手元に残したまま担保とし、不履行時に競売等から優先弁済を受ける約定担保物権である。
+- [ ] 抵当権者が他の後順位債権者に優先して弁済を受けられる利息・遅延損害金は、何年分であっても無制限に対抗できる。
+- [ ] 質権は、質権設定者に目的物を手元で代理占有させる合意（占有改定）によっても有効に設定できる。
+> 解説: 抵当権は占有を移転しない約定担保物権です。留置権は法定担保物権で物上代位性はありません。抵当権の利息・遅延損害金の優先弁済枠は「満期となった最後の2年分」に制限されます。動産質権の占有改定による設定は禁止されています。
+
+### 問24 [第5章 債権の管理と回収・担保・時効・倒産]
+債権譲渡および相殺に関する次の記述のうち、最も不適切なものはどれか。
+- [ ] 債権譲渡を債務者に対抗するためには、譲渡人から債務者への通知、または債務者の承諾が必要である。
+- [ ] 確定日付のある証書による通知同士が到達した場合、その優劣は確定日付の先後ではなく、通知が「債務者に到達した日時」の先後で決まる。
+- [x] お互いに同種の債権を有している場合、自らが主張する債権（自働債権）の弁済期が到来していなくても、相手方に一方的に相殺を主張できる。
+- [ ] 不法行為によって生じた損害賠償債務を受動債権として、加害者側から相殺することは原則として禁止されている。
+> 解説: 相殺を主張するためには、自分が請求する側の債権である「自働債権」の弁済期が到来している必要があります（相手の期限の利益を一方的に奪えないため）。受働債権の弁済期到来は不要です。
+
+### 問25 [第5章 債権の管理と回収・担保・時効・倒産]
+消滅時効に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 債務者が支払期限を過ぎてから債務の存在を認める「承認」をした場合、進行していた消滅時効は「完成猶予」されるだけで、期間がリセットされることはない。
+- [x] 権利を行使することができることを知った時から5年間行使しないときは、債権は時効によって消滅する（一般的な契約債権）。
+- [ ] 債権者が債務者に対して裁判外で内容証明郵便による支払催告を行った場合、それだけで時効期間は直ちにゼロにリセットされる。
+- [ ] 時効期間が満了すれば、当事者が時効の利益を受ける旨の意思表示（援用）をしなくても、自動的に裁判所で時効が適用される。
+> 解説: 民法上、債権は「権利を行使できることを知った時から5年」行使しないときに時効消滅します。債務の承認は時効の「更新」（ゼロにリセット）となります。裁判外の催告は6か月間の「完成猶予」を生じさせるのみです。時効は援用が必要です。
+
+### 問26 [第5章 債権の管理と回収・担保・時効・倒産]
+強制執行および倒産処理手続に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 公証人が作成した公正証書であれば、いかなる文言であっても、直ちに強制執行を申し立てることができる債務名義となる。
+- [ ] 倒産手続のうち、会社の法人格を解体・消滅させて財産を換価・配当する手続を「再建型手続」と呼ぶ。
+- [x] 民事再生手続は、従来の経営陣が原則として退陣せず、再生計画を立てて事業を継続しながら再建を目指す手続である。
+- [ ] 会社更生手続は、株式会社だけでなく個人事業主や合同会社も利用できる再建手続である。
+> 解説: 民事再生手続はDIP型と呼ばれ、原則として従来の経営陣が経営を継続しながら再建を図ります。公正証書が債務名義になるには「強制執行認諾文言」が必要です。会社を解体するのは「清算型（破産・特別清算）」です。会社更生手続は「株式会社のみ」が対象です。
+
+### 問27 [第6章 企業活動に関する法規制・消費者保護・情報・犯罪]
+独占禁止法に関する次の記述のうち、最も適切なものはどれか。
+- [x] 同業他社が連絡を取り合い、商品の販売価格や生産数量を共同で取り決める行為（カルテル）は、「不当な取引制限」に該当し禁止されている。
+- [ ] 取引上優位な地位にある事業者が、取引先に対して不当に不利益な条件を押し付ける行為は、「私的独占」としてのみ処罰される。
+- [ ] 独占禁止法の執行機関は消費者庁であり、違反企業に対して課徴金納付命令を下すことができる。
+- [ ] 独占禁止法は、事業者が単独で行う事業活動については一切規制の対象としていない。
+> 解説: カルテルや入札談合は独禁法上の「不当な取引制限」に該当します。優越的地位の濫用は「不公正な取引方法」に分類されます。独占禁止法の所管は「公正取引委員会」です。単独行為であっても私的独占や不公正な取引方法として規制されます。
+
+### 問28 [第6章 企業活動に関する法規制・消費者保護・情報・犯罪]
+中小受託取引適正化法（下請法）に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 親事業者は、下請事業者から納品された物品の検査が長引いた場合、受領から90日後を下請代金の支払期日とすることができる。
+- [ ] 下請事業者の書面による同意があれば、親事業者は発注時に定めた下請代金を減額しても法律上何らの問題もない。
+- [x] 親事業者は、下請事業者が給付を完了した後、受領した日から起算して60日以内で、かつできる限り短い期間内に下請代金の支払期日を定めなければならない。
+- [ ] 下請法は、資本金規模に関係なく、すべての企業間の受託取引に例外なく適用される。
+> 解説: 下請法では、支払期日は「給付を受領した日から起算して60日以内」で、かつできる限り短い期間でなければなりません（検査の長短は無関係）。下請事業者の合意があっても不当な減額は違法です。資本金基準等により適用が区分されます。
+
+### 問29 [第6章 企業活動に関する法規制・消費者保護・情報・犯罪]
+消費者契約法に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 個人事業主が自らの事業のために購入する資材の売買契約にも、消費者契約法が適用される。
+- [x] 事業者の債務不履行により消費者に生じた損害を賠償する責任の「全部を免除する」条項は、消費者に不利な条項として無効となる。
+- [ ] 事業者が重要事項について事実と異なることを告げた（不実告知）場合であっても、消費者は契約を取り消すことはできない。
+- [ ] 消費者契約法に基づく取消権は、誤認に気づいた時から5年間行使しないときは時効により消滅する。
+> 解説: 消費者契約法では、事業者の損害賠償責任の「全部」を免除する特約は無効です。事業として行う取引は対象外です。不実告知による誤認契約は取り消せます。取消権は追認できる時から「1年」（契約締結から5年）です。
+
+### 問30 [第6章 企業活動に関する法規制・消費者保護・情報・犯罪]
+特定商取引法におけるクーリング・オフ制度に関する次の記述のうち、最も不適切なものはどれか。
+- [ ] 訪問販売や電話勧誘販売で契約した場合、法定書面を受領した日から8日以内であればクーリング・オフができる。
+- [x] インターネットの通信販売サイトで商品を購入した場合、特定商取引法上のクーリング・オフ制度により、商品到着後8日以内であれば常に無条件で契約を解除できる。
+- [ ] クーリング・オフの意思表示は、書面（ハガキ等）のほか、電子メールなどの電磁的記録によっても行うことができる。
+- [ ] マルチ商法（連鎖販売取引）におけるクーリング・オフ期間は、書面受領日から「20日間」と定められている。
+> 解説: 特定商取引法上、インターネット通販などの「通信販売」には法的なクーリング・オフ制度は設けられていません（返品特約の表示義務があるのみ）。返品不可と明示されていれば返品できません。
+
+### 問31 [第6章 企業活動に関する法規制・消費者保護・情報・犯罪]
+個人情報保護法およびマイナンバー法に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 特定の個人を識別できないように加工し復元できないようにした「匿名加工情報」であっても、第三者へ提供する際は本人の個別の同意が必須である。
+- [x] 個人情報取扱事業者が、利用目的の達成に必要な範囲内で個人データの取扱いを外部へ「委託」する場合、第三者提供には該当せず本人の同意は不要である。
+- [ ] マイナンバー（個人番号）は、本人の明確な同意さえあれば、民間企業が独自の顧客管理用IDとして自由に利用してよい。
+- [ ] 死者に関する情報は、いかなる場合も個人情報保護法上の「個人情報」に該当する。
+> 解説: 業務委託に伴う個人データの提供は「第三者提供」に該当しないため、本人の事前同意は不要です（受託先への監督義務あり）。匿名加工情報は本人の同意なく第三者提供可能です。マイナンバーは法定事務以外での利用・収集は本人の同意があっても厳禁です。個人情報は生存する個人に関する情報です。
+
+### 問32 [第6章 企業活動に関する法規制・消費者保護・情報・犯罪]
+ビジネスに関連する刑法・会社法上の犯罪に関する次の記述のうち、最も適切なものはどれか。
+- [x] 取締役が自己または第三者の利益を図る目的で任務に背く行為をし、会社に財産上の損害を与えた場合、会社法上の「特別背任罪」が成立する。
+- [ ] 会社の経理担当者が、会社名義の預金口座から勝手に現金を引き出して私的に費消した行為には、単純横領罪が成立する。
+- [ ] 配当可能な剰余金がないにもかかわらず、粉飾決算等を行って違法な配当をした場合であっても、刑事罰が科されることはない。
+- [ ] 飲食店で提供された料理を食べた後、最初から代金を支払う意思がなかったにもかかわらず無銭飲食して逃走した行為には、背任罪が成立する。
+> 解説: 取締役等の会社役員が任務違背で会社に損害を与えた場合、刑法の背任罪より刑の重い会社法上の「特別背任罪」が成立します。経理担当者の横領は「業務上横領罪」です。違法配当には「違法配当罪（会社法）」があります。無銭飲食は「詐欺罪」に問われます。
+
+### 問33 [第7章 法人と従業員の関係・労働法]
+労働基準法における労働条件の基本原則に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 労働基準法で定める労働条件の基準を下回る労働契約を締結した場合、その契約全体が無効となり、雇用関係自体が初めから消滅する。
+- [ ] 会社は、労働者が業務上のミスで損害を与えた場合に備えて、あらかじめ労働契約で「1回のミスにつき違約金5万円を支払う」と定めることができる。
+- [x] 労働基準法で定める基準に達しない労働条件を定めた契約部分は無効となり、その無効となった部分は労働基準法で定める基準による。
+- [ ] 国籍、信条、社会的身分、性別による労働条件の差別的取扱いは、労働基準法第3条（均等待遇）によって等しく禁止されている。
+> 解説: 労働基準法は最低基準を定めた強行法規であり、基準を下回る部分は無効となり法定基準に引き上げられます（直律的効力）。賠償予定の禁止（16条）により違約金の事前設定は禁止されます。なお労基法3条の均等待遇の列挙事由に「性別」は含まれず（第4条の男女同一賃金の原則や均等法で規律）、3条は国籍・信条・社会的身分です。
+
+### 問34 [第7章 法人と従業員の関係・労働法]
+就業規則および賃金支払に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 常時5人の労働者を使用する事業場においても、所轄労働基準監督署長への就業規則の作成・届出義務がある。
+- [ ] 就業規則の作成・届出にあたっては、労働者の過半数で組織する労働組合（ない場合は労働者の過半数代表者）の「同意」を得なければならない。
+- [x] 賃金は、通貨で、直接労働者に、その全額を、毎月1回以上一定期日を定めて支払わなければならない（賃金支払の四原則）。
+- [ ] 退職手当（退職金）に関する定めは、退職金制度を設けない企業であっても、就業規則に必ず記載しなければならない「絶対的必要記載事項」である。
+> 解説: 賃金支払の四原則（通貨払・直接払・全額払・毎月1回以上一定期日払）が定められています。就業規則の作成届出義務は「常時10人以上」です。意見聴取（意見書の添付）が必要ですが同意までは不要です。退職金は制度がある場合に記載する「相対的必要記載事項」です（退職に関する事項自体は絶対的必要記載事項）。
+
+### 問35 [第7章 法人と従業員の関係・労働法]
+労働時間、休憩、休日および時間外労働に関する次の記述のうち、最も不適切なものはどれか。
+- [ ] 法定労働時間は原則として「1日8時間、週40時間」と定められている。
+- [ ] 労働時間が8時間を超える場合、使用者は労働時間の途中に少なくとも「1時間」の休憩時間を与えなければならない。
+- [x] 三六協定（時間外・休日労働に関する労使協定）を締結して届け出れば、時間外労働をさせても割増賃金を支払う義務は免除される。
+- [ ] 使用者が労働者を解雇しようとする場合、少なくとも30日前に予告をするか、または30日分以上の平均賃金（解雇予告手当）を支払わなければならない。
+> 解説: 三六協定の締結・届出は時間外労働をさせても刑事罰を受けないという「免罰効果」を生じさせるのみであり、法定の割増賃金（2割5分以上等）の支払義務は当然に免除されません。
+
+### 問36 [第7章 法人と従業員の関係・労働法]
+労働契約の終了、労働者派遣およびハラスメントに関する次の記述のうち、最も適切なものはどれか。
+- [ ] 客観的に合理的な理由を欠き、社会通念上相当と認められない解雇であっても、使用者が解雇予告手当を支払えば有効となる。
+- [x] 労働者派遣において、派遣労働者と雇用契約を結んでいるのは派遣元であり、派遣先は指揮命令権のみを有する。
+- [ ] システム開発の請負契約において、発注者が受注者側のエンジニアに対して現場で直接に作業手順や残業の指揮命令を出す行為は適法である。
+- [ ] 職場におけるパワーハラスメント防止措置は、大企業のみの努力義務であり、中小企業には法的な防止措置義務は課されていない。
+> 解説: 労働者派遣は「派遣元」と雇用関係にあり、「派遣先」と指揮命令関係にあります。合理的な理由のない解雇は解雇権濫用として無効です。請負で発注者が直接指示を出すのは違法な「偽装請負」です。パワハラ防止措置は中小企業も含め全事業主に義務付けられています。
+
+### 問37 [第8章 ビジネスに関連する家族法・婚姻・相続]
+夫婦財産関係に関する次の記述のうち、民法の規定に照らし最も適切なものはどれか。
+- [ ] 婚姻の成立により、夫婦の一方が婚姻前から有していた財産は、法律上当然に夫婦の共有財産となる。
+- [x] 日常の家事に関して生じた債務（日常家事債務）については、夫婦の一方が単独で契約した場合であっても、夫婦双方が連帯して弁済する責任を負う。
+- [ ] 夫婦間で交わされた契約は、いかなる理由があっても、婚姻中であっても取り消すことはできない。
+- [ ] 夫婦の財産関係について、婚姻前に別段の契約（夫婦財産契約）を結ぶことは法律上禁止されている。
+> 解説: 日常家事債務（食料品や生活必需品の購入、家賃等）は夫婦が連帯して責任を負います（民法761条）。婚姻前の財産や自己の名で得た財産は各自の「特有財産」となります。夫婦間の契約は婚姻中いつでも取り消せます（第三者の権利を害さない限り）。夫婦財産契約は締結可能です。
+
+### 問38 [第8章 ビジネスに関連する家族法・婚姻・相続]
+法定相続人の順位および代襲相続に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 被相続人の配偶者は、第1順位の相続人（子）がいる場合は相続人になることができない。
+- [ ] 被相続人に子と実母がいる場合、実母が第2順位の相続人として、子と同順位で共同相続人となる。
+- [x] 被相続人の子が相続開始前に死亡していた場合、その者の子（被相続人の孫）が代わりに相続人となる（代襲相続）。
+- [ ] 被相続人の子が家庭裁判所で適法に「相続放棄」をした場合であっても、その子（被相続人の孫）は代襲相続することができる。
+- [ ] 兄弟姉妹が相続人となる場合、兄弟姉妹が先に死亡していれば、その孫（甥・姪の子）まで何世代でも再代襲相続できる。
+> 解説: 子が先に死亡していた場合は孫が代襲相続します。配偶者は常に相続人です。第1順位（子）がいる場合、第2順位（直系尊属）は相続人になりません。相続放棄をした者の子は代襲相続できません（初めから相続人とならなかったものとみなされるため）。兄弟姉妹の代襲は甥・姪の1代限りです。
+
+### 問39 [第8章 ビジネスに関連する家族法・婚姻・相続]
+法定相続分および配偶者保護に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 配偶者と子2人が相続人である場合、配偶者の法定相続分は3分の1、子2人の法定相続分はそれぞれ3分の1ずつである。
+- [ ] 配偶者と被相続人の父母が相続人である場合、配偶者の法定相続分は2分の1である。
+- [x] 配偶者と被相続人の兄が相続人である場合、配偶者の法定相続分は4分の3、兄の法定相続分は4分の1である。
+- [ ] 配偶者居住権とは、被相続人の所有する建物に住んでいた配偶者が、不動産の所有権そのものを無条件かつ単独で取得できる制度である。
+> 解説: 配偶者と兄弟姉妹が相続人の場合、法定相続分は「配偶者が4分の3、兄弟姉妹が4分の1」です。配偶者と子の場合は配偶者1/2・子1/2（子2人なら各1/4）。配偶者と直系尊属の場合は配偶者2/3・直系尊属1/3です。配偶者居住権は所有権ではなく無償で使用・収益できる権利です。
+
+### 問40 [第8章 ビジネスに関連する家族法・婚姻・相続]
+遺言および遺留分に関する次の記述のうち、最も適切なものはどれか。
+- [ ] 満18歳に達していなければ、親権者の同意を得たとしても遺言をすることは一切できない。
+- [ ] 自筆証書遺言を作成する場合、添付する財産目録も含めて、すべて全文を必ず手書き（自書）しなければならない。
+- [x] 被相続人の兄弟姉妹には、いかに不公平な遺言がなされた場合であっても、遺留分侵害額請求権（遺留分）は認められていない。
+- [ ] 相続人が自己のために相続の開始があったことを知った時から3か月以内に何らの手続もしなかった場合、自動的に相続放棄したものとみなされる。
+> 解説: 遺留分は兄弟姉妹には認められていません（配偶者・子・直系尊属のみ）。遺言能力は満15歳以上で単独で行えます。自筆証書遺言に添付する「財産目録」はパソコン作成や通帳コピー添付が可能です。3か月何もしないと単純承認したとみなされます。
+`;
+
+    /* =====================================================================
+       2. APPLICATION STATE & CONTROLLER
+       ===================================================================== */
+    let questionsData = []; // Parsed question bank
+    let activeQuestions = []; // Active 40 questions (with shuffled choices)
+    let userAnswers = {}; // { questionIndex: chosenOptionIndex }
+    let flaggedQuestions = new Set(); // Set of question indices marked as flagged
+    let currentQuestionIdx = 0;
+    let timerInterval = null;
+    let timeRemainingSeconds = 90 * 60; // 90 minutes
+    let isExamFinished = false;
+
+    // Toast helper
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toast-msg');
+      const icon = document.getElementById('toast-icon');
+      msgEl.textContent = message;
+      if (isError) {
+        icon.className = "fa-solid fa-circle-exclamation text-rose-400";
+      } else {
+        icon.className = "fa-solid fa-circle-check text-emerald-400";
+      }
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    // Markdown Parser (Robust parser for user-provided markdown)
+    function parseMarkdownQuestions(mdText) {
+      const questions = [];
+      const lines = mdText.split(/\r?\n/);
+      let currentQ = null;
+      let state = 'NONE'; // 'NONE' | 'QUESTION' | 'OPTIONS' | 'EXPLANATION'
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+
+        // Detect Question Header (### 問1 [第○章...] or ## 問1...)
+        if (line.match(/^#{2,4}\s*問\s*\d+/i) || line.match(/^#{2,4}\s*Q\s*\d+/i)) {
+          if (currentQ && currentQ.options.length >= 2) {
+            questions.push(currentQ);
+          }
+          // Extract Chapter tag if present: e.g. [第2章 ...]
+          const chapterMatch = line.match(/\[(.*?)\]/) || line.match(/【(.*?)】/);
+          const chapter = chapterMatch ? chapterMatch[1].trim() : '総合・法務実務';
+          const title = line.replace(/^#{2,4}\s*/, '');
+
+          currentQ = {
+            id: questions.length + 1,
+            title: title,
+            chapter: chapter,
+            questionText: '',
+            options: [],
+            correctOptionIndex: -1,
+            explanation: ''
+          };
+          state = 'QUESTION';
+          continue;
+        }
+
+        if (!currentQ) continue;
+
+        // Detect Choice: - [ ] or - [x] or * ( ) or 1.
+        const optionMatch = line.match(/^[-*]\s*\[([ xX])\]\s*(.*)/);
+        if (optionMatch) {
+          state = 'OPTIONS';
+          const isCorrect = optionMatch[1].toLowerCase() === 'x';
+          const optText = optionMatch[2].trim();
+          currentQ.options.push({ text: optText, isCorrect: isCorrect });
+          if (isCorrect) {
+            currentQ.correctOptionIndex = currentQ.options.length - 1;
+          }
+          continue;
+        }
+
+        // Detect Explanation: > 解説: or > 解説 ...
+        if (line.match(/^>\s*解説[:：]?/i) || line.match(/^【解説】/i)) {
+          state = 'EXPLANATION';
+          const expText = line.replace(/^>\s*解説[:：]?\s*/i, '').replace(/^【解説】\s*/, '');
+          currentQ.explanation += (currentQ.explanation ? '\n' : '') + expText;
+          continue;
+        }
+
+        // Content accumulator based on state
+        if (state === 'QUESTION') {
+          if (line) {
+            currentQ.questionText += (currentQ.questionText ? '\n' : '') + line;
+          }
+        } else if (state === 'EXPLANATION') {
+          if (line.startsWith('>')) {
+            currentQ.explanation += '\n' + line.replace(/^>\s*/, '');
+          } else if (line) {
+            currentQ.explanation += '\n' + line;
+          }
+        }
+      }
+
+      if (currentQ && currentQ.options.length >= 2) {
+        questions.push(currentQ);
+      }
+
+      return questions;
+    }
+
+    // Shuffle Array Utility
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    // Initialize Active Exam Session
+    function prepareExamSession() {
+      if (!questionsData || questionsData.length === 0) {
+        showToast('読み込める問題がありません。', true);
+        return false;
+      }
+
+      // Limit to 40 questions (or all if less than 40)
+      const count = Math.min(40, questionsData.length);
+      const selected = questionsData.slice(0, count);
+
+      // Deep copy and SHUFFLE choices for each question
+      activeQuestions = selected.map((q, idx) => {
+        // Tag original indices
+        const optionsWithFlag = q.options.map((opt, oIdx) => ({
+          text: opt.text,
+          isCorrect: oIdx === q.correctOptionIndex
+        }));
+
+        // Shuffle choices randomly
+        const shuffled = shuffleArray(optionsWithFlag);
+        const newCorrectIdx = shuffled.findIndex(o => o.isCorrect);
+
+        return {
+          id: idx + 1,
+          originalId: q.id,
+          chapter: q.chapter,
+          title: q.title,
+          questionText: q.questionText,
+          options: shuffled,
+          correctOptionIndex: newCorrectIdx,
+          explanation: q.explanation || '解説は登録されていません。'
+        };
+      });
+
+      userAnswers = {};
+      flaggedQuestions.clear();
+      currentQuestionIdx = 0;
+      isExamFinished = false;
+      timeRemainingSeconds = 90 * 60; // 90 mins
+
+      // Update counters in DOM
+      document.getElementById('total-q-count-badge').textContent = activeQuestions.length;
+      document.getElementById('total-count-label').textContent = activeQuestions.length;
+      document.getElementById('final-total-count').textContent = activeQuestions.length;
+
+      return true;
+    }
+
+    // Timer Functions
+    function startTimer() {
+      clearInterval(timerInterval);
+      const display = document.getElementById('header-timer-display');
+      const wrap = document.getElementById('header-timer-wrap');
+      wrap.classList.remove('hidden');
+      wrap.classList.add('flex');
+
+      function update() {
+        if (timeRemainingSeconds <= 0) {
+          clearInterval(timerInterval);
+          showToast('制限時間（90分）に達しました。試験を終了します。', true);
+          finishAndGradeExam();
+          return;
+        }
+        timeRemainingSeconds--;
+        const mins = Math.floor(timeRemainingSeconds / 60);
+        const secs = timeRemainingSeconds % 60;
+        display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+        if (timeRemainingSeconds <= 300) { // under 5 min alert
+          display.classList.add('text-rose-400');
+        } else {
+          display.classList.remove('text-rose-400');
+        }
+      }
+
+      update();
+      timerInterval = setInterval(update, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      document.getElementById('header-timer-wrap').classList.add('hidden');
+    }
+
+    // View Switching
+    function switchView(viewName) {
+      document.getElementById('view-start').classList.add('hidden');
+      document.getElementById('view-exam').classList.add('hidden');
+      document.getElementById('view-result').classList.add('hidden');
+      document.getElementById('quit-exam-btn').classList.add('hidden');
+
+      if (viewName === 'start') {
+        document.getElementById('view-start').classList.remove('hidden');
+        stopTimer();
+      } else if (viewName === 'exam') {
+        document.getElementById('view-exam').classList.remove('hidden');
+        document.getElementById('view-exam').classList.add('flex');
+        document.getElementById('quit-exam-btn').classList.remove('hidden');
+        renderCurrentQuestion();
+        renderQuestionPalette();
+        updateProgressBar();
+      } else if (viewName === 'result') {
+        document.getElementById('view-result').classList.remove('hidden');
+        document.getElementById('view-result').classList.add('flex');
+        stopTimer();
+      }
+    }
+
+    // Render Question in CBT Interface
+    function renderCurrentQuestion() {
+      if (!activeQuestions[currentQuestionIdx]) return;
+      const q = activeQuestions[currentQuestionIdx];
+
+      document.getElementById('current-q-index-badge').textContent = currentQuestionIdx + 1;
+      document.getElementById('current-q-chapter').textContent = q.chapter;
+      document.getElementById('question-text').textContent = q.questionText;
+
+      // Update question badge
+      const isTrueFalse = q.options.length === 2 && (q.options[0].text.includes('正しい') || q.options[0].text.includes('マル') || q.options[0].text.includes('正'));
+      document.getElementById('q-type-badge').textContent = isTrueFalse ? '正誤判定式（2択）' : `${q.options.length}肢択一式`;
+
+      // Update Bookmark Flag Button
+      const isFlagged = flaggedQuestions.has(currentQuestionIdx);
+      const flagBtn = document.getElementById('flag-toggle-btn');
+      const flagIcon = document.getElementById('flag-icon');
+      const flagText = document.getElementById('flag-text');
+
+      if (isFlagged) {
+        flagBtn.className = "bg-amber-100 border border-amber-300 text-amber-900 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition";
+        flagIcon.className = "fa-solid fa-bookmark text-amber-600";
+        flagText.textContent = "見直し対象（チェック中）";
+      } else {
+        flagBtn.className = "border border-slate-300 hover:bg-amber-50 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition text-slate-700";
+        flagIcon.className = "fa-regular fa-bookmark text-slate-400";
+        flagText.textContent = "後で見直す";
+      }
+
+      // Render Options
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+
+      const labels = ['ア', 'イ', 'ウ', 'エ', 'オ'];
+      const selectedIdx = userAnswers[currentQuestionIdx];
+
+      q.options.forEach((opt, idx) => {
+        const isSelected = selectedIdx === idx;
+        const optCard = document.createElement('div');
+        optCard.className = `p-3.5 md:p-4 rounded-xl border-2 cursor-pointer transition-all flex items-start gap-3 ${
+          isSelected 
+            ? 'border-blue-600 bg-blue-50/70 shadow-sm' 
+            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+        }`;
+
+        const markerLabel = labels[idx] || (idx + 1);
+
+        optCard.innerHTML = `
+          <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs mt-0.5 ${
+            isSelected ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-700'
+          }">
+            ${markerLabel}
+          </div>
+          <div class="flex-1 text-sm md:text-base leading-relaxed text-slate-800">
+            ${opt.text}
+          </div>
+          <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 ${
+            isSelected ? 'border-blue-600 bg-blue-600' : 'border-slate-300'
+          }">
+            ${isSelected ? '<i class="fa-solid fa-check text-white text-[10px]"></i>' : ''}
+          </div>
+        `;
+
+        optCard.onclick = () => {
+          userAnswers[currentQuestionIdx] = idx;
+          renderCurrentQuestion();
+          renderQuestionPalette();
+          updateProgressBar();
+        };
+
+        optionsContainer.appendChild(optCard);
+      });
+
+      // Prev/Next Button enable/disable
+      document.getElementById('prev-q-btn').disabled = (currentQuestionIdx === 0);
+      document.getElementById('prev-q-btn').classList.toggle('opacity-50', currentQuestionIdx === 0);
+      document.getElementById('prev-q-btn').classList.toggle('cursor-not-allowed', currentQuestionIdx === 0);
+
+      document.getElementById('next-q-btn').disabled = (currentQuestionIdx === activeQuestions.length - 1);
+      document.getElementById('next-q-btn').classList.toggle('opacity-50', currentQuestionIdx === activeQuestions.length - 1);
+      document.getElementById('next-q-btn').classList.toggle('cursor-not-allowed', currentQuestionIdx === activeQuestions.length - 1);
+    }
+
+    // Question Palette (1..40 buttons)
+    function renderQuestionPalette() {
+      const paletteGrid = document.getElementById('question-palette-grid');
+      paletteGrid.innerHTML = '';
+
+      activeQuestions.forEach((q, idx) => {
+        const isCurrent = currentQuestionIdx === idx;
+        const isAnswered = userAnswers[idx] !== undefined;
+        const isFlagged = flaggedQuestions.has(idx);
+
+        const btn = document.createElement('button');
+        let styleClasses = "relative h-9 rounded font-mono font-bold text-xs transition border flex items-center justify-center ";
+
+        if (isCurrent) {
+          styleClasses += "ring-2 ring-blue-600 ring-offset-1 ";
+        }
+
+        if (isAnswered) {
+          styleClasses += "bg-blue-600 text-white border-blue-700 ";
+        } else {
+          styleClasses += "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 ";
+        }
+
+        btn.className = styleClasses;
+        btn.textContent = idx + 1;
+
+        // Flag icon dot
+        if (isFlagged) {
+          const dot = document.createElement('span');
+          dot.className = "absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full border border-white shadow-xs";
+          btn.appendChild(dot);
+        }
+
+        btn.onclick = () => {
+          currentQuestionIdx = idx;
+          renderCurrentQuestion();
+          renderQuestionPalette();
+        };
+
+        paletteGrid.appendChild(btn);
+      });
+    }
+
+    // Update Progress Bar & Answered Count
+    function updateProgressBar() {
+      const answeredCount = Object.keys(userAnswers).length;
+      const totalCount = activeQuestions.length;
+      document.getElementById('answered-count').textContent = answeredCount;
+      const pct = totalCount > 0 ? (answeredCount / totalCount) * 100 : 0;
+      document.getElementById('exam-progress-bar').style.width = `${pct}%`;
+    }
+
+    // Complete Exam & Calculate Score
+    function finishAndGradeExam() {
+      const unanswered = activeQuestions.length - Object.keys(userAnswers).length;
+      if (unanswered > 0 && timeRemainingSeconds > 0) {
+        const confirmFinish = window.confirm(`未解答の問題が ${unanswered} 問あります。試験を終了して採点してもよろしいですか？`);
+        if (!confirmFinish) return;
+      }
+
+      isExamFinished = true;
+      stopTimer();
+
+      let correctCount = 0;
+      const chapterStats = {};
+
+      activeQuestions.forEach((q, idx) => {
+        const userChoice = userAnswers[idx];
+        const isCorrect = userChoice !== undefined && userChoice === q.correctOptionIndex;
+        if (isCorrect) correctCount++;
+
+        // Chapter stats aggregation
+        const ch = q.chapter || '共通';
+        if (!chapterStats[ch]) {
+          chapterStats[ch] = { total: 0, correct: 0 };
+        }
+        chapterStats[ch].total++;
+        if (isCorrect) chapterStats[ch].correct++;
+      });
+
+      // Calculate score out of 100
+      const score = Math.round((correctCount / activeQuestions.length) * 100);
+      const isPassed = score >= 70;
+
+      // Update Result Hero UI
+      const resultBg = document.getElementById('result-hero-bg');
+      const badge = document.getElementById('result-status-badge');
+      const title = document.getElementById('result-verdict-title');
+      const desc = document.getElementById('result-verdict-desc');
+
+      if (isPassed) {
+        resultBg.className = "p-6 md:p-8 bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-900 text-white flex flex-col md:flex-row justify-between items-center gap-6";
+        badge.className = "inline-block text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2 bg-emerald-500/30 text-emerald-300 border border-emerald-400/30";
+        badge.textContent = "PASSED / 合格達成";
+        title.textContent = "合格おめでとうございます！";
+        desc.textContent = "ビジネス実務法務検定3級の合格基準（70点）を突破しました！十分な知識が身についています。";
+      } else {
+        resultBg.className = "p-6 md:p-8 bg-gradient-to-r from-rose-900 via-slate-900 to-indigo-950 text-white flex flex-col md:flex-row justify-between items-center gap-6";
+        badge.className = "inline-block text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2 bg-rose-500/30 text-rose-300 border border-rose-400/30";
+        badge.textContent = "NOT PASSED / あと一歩";
+        title.textContent = "もう一息で合格ラインです！";
+        desc.textContent = "合格基準は70点以上です。間違えた問題の詳細解説を復習し、苦手分野を克服しましょう。";
+      }
+
+      document.getElementById('final-score-val').textContent = score;
+      document.getElementById('final-correct-count').textContent = correctCount;
+      document.getElementById('final-accuracy-percent').textContent = `正答率: ${Math.round((correctCount / activeQuestions.length) * 100)}%`;
+
+      // Render Chapter-wise Grid
+      const chapterGrid = document.getElementById('chapter-stats-grid');
+      chapterGrid.innerHTML = '';
+      Object.keys(chapterStats).forEach(chName => {
+        const item = chapterStats[chName];
+        const pct = Math.round((item.correct / item.total) * 100);
+        const card = document.createElement('div');
+        card.className = "bg-white p-3 rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between";
+        card.innerHTML = `
+          <div class="text-xs font-semibold text-slate-700 mb-1 truncate" title="${chName}">${chName}</div>
+          <div class="flex items-baseline justify-between">
+            <span class="text-xs text-slate-400">${item.correct}/${item.total}問</span>
+            <span class="text-sm font-bold ${pct >= 70 ? 'text-emerald-600' : 'text-rose-500'} font-mono">${pct}%</span>
+          </div>
+          <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
+            <div class="${pct >= 70 ? 'bg-emerald-500' : 'bg-rose-500'} h-1.5 rounded-full" style="width: ${pct}%"></div>
+          </div>
+        `;
+        chapterGrid.appendChild(card);
+      });
+
+      renderReviewList('all');
+      switchView('result');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Render Detailed Review List with Filtering
+    function renderReviewList(filterType = 'all') {
+      const reviewContainer = document.getElementById('review-questions-list');
+      reviewContainer.innerHTML = '';
+
+      const labels = ['ア', 'イ', 'ウ', 'エ', 'オ'];
+
+      activeQuestions.forEach((q, idx) => {
+        const userChoice = userAnswers[idx];
+        const isCorrect = userChoice !== undefined && userChoice === q.correctOptionIndex;
+        const isFlagged = flaggedQuestions.has(idx);
+
+        // Apply filters
+        if (filterType === 'wrong' && isCorrect) return;
+        if (filterType === 'flagged' && !isFlagged) return;
+
+        const card = document.createElement('div');
+        card.className = `bg-white rounded-xl shadow-sm border p-5 md:p-6 transition ${
+          isCorrect ? 'border-slate-200' : 'border-rose-200 bg-rose-50/20'
+        }`;
+
+        let optionsHtml = '';
+        q.options.forEach((opt, oIdx) => {
+          const isUserPick = userChoice === oIdx;
+          const isTheCorrect = q.correctOptionIndex === oIdx;
+          let optStyle = 'border-slate-200 bg-white text-slate-700';
+
+          if (isTheCorrect) {
+            optStyle = 'border-emerald-500 bg-emerald-50/80 text-emerald-900 font-semibold';
+          } else if (isUserPick && !isTheCorrect) {
+            optStyle = 'border-rose-400 bg-rose-50/80 text-rose-900';
+          }
+
+          optionsHtml += `
+            <div class="p-2.5 rounded-lg border text-xs md:text-sm flex items-start gap-2.5 ${optStyle}">
+              <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${
+                isTheCorrect ? 'bg-emerald-600 text-white' : (isUserPick ? 'bg-rose-600 text-white' : 'bg-slate-200 text-slate-700')
+              }">
+                ${labels[oIdx] || (oIdx + 1)}
+              </span>
+              <span class="flex-1">${opt.text}</span>
+              ${isTheCorrect ? '<span class="text-emerald-700 font-bold text-xs flex items-center gap-1"><i class="fa-solid fa-check"></i> 正解</span>' : ''}
+              ${isUserPick && !isTheCorrect ? '<span class="text-rose-600 font-bold text-xs flex items-center gap-1"><i class="fa-solid fa-xmark"></i> あなたの解答</span>' : ''}
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="flex flex-wrap justify-between items-center gap-2 mb-3 pb-2 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-sm text-slate-900">第 ${idx + 1} 問</span>
+              <span class="text-xs bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-600">${q.chapter}</span>
+              ${isFlagged ? '<span class="text-xs bg-amber-100 text-amber-800 border border-amber-300 px-1.5 py-0.5 rounded flex items-center gap-1"><i class="fa-solid fa-bookmark text-amber-600"></i> 見直し</span>' : ''}
+            </div>
+            <div>
+              ${
+                isCorrect 
+                  ? '<span class="bg-emerald-100 text-emerald-800 font-bold text-xs px-2.5 py-1 rounded-full flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> 正解</span>'
+                  : '<span class="bg-rose-100 text-rose-800 font-bold text-xs px-2.5 py-1 rounded-full flex items-center gap-1"><i class="fa-solid fa-circle-xmark"></i> 不正解</span>'
+              }
+            </div>
+          </div>
+
+          <div class="text-sm md:text-base font-medium text-slate-800 mb-4 whitespace-pre-line leading-relaxed">
+            ${q.questionText}
+          </div>
+
+          <div class="space-y-2 mb-4">
+            ${optionsHtml}
+          </div>
+
+          <!-- Explanation box -->
+          <div class="bg-slate-50 border-l-4 border-blue-600 p-3.5 rounded-r-lg text-xs md:text-sm text-slate-700">
+            <span class="font-bold text-slate-900 block mb-1 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-amber-500"></i> 詳細解説
+            </span>
+            <div class="leading-relaxed whitespace-pre-line text-slate-600">
+              ${q.explanation}
+            </div>
+          </div>
+        `;
+
+        reviewContainer.appendChild(card);
+      });
+
+      if (reviewContainer.children.length === 0) {
+        reviewContainer.innerHTML = `
+          <div class="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-500 text-sm">
+            該当する問題はありませんでした。
+          </div>
+        `;
+      }
+    }
+
+    /* =====================================================================
+       3. EVENT LISTENERS & SETUP
+       ===================================================================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Load Preset 40 questions on boot
+      questionsData = parseMarkdownQuestions(DEFAULT_PRESET_MARKDOWN);
+      document.getElementById('start-q-count').textContent = `${questionsData.length}問`;
+
+      // 2. Start Exam Button
+      document.getElementById('start-exam-btn').onclick = () => {
+        if (prepareExamSession()) {
+          switchView('exam');
+          startTimer();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      };
+
+      // 3. Navigation Buttons
+      document.getElementById('next-q-btn').onclick = () => {
+        if (currentQuestionIdx < activeQuestions.length - 1) {
+          currentQuestionIdx++;
+          renderCurrentQuestion();
+          renderQuestionPalette();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      };
+
+      document.getElementById('prev-q-btn').onclick = () => {
+        if (currentQuestionIdx > 0) {
+          currentQuestionIdx--;
+          renderCurrentQuestion();
+          renderQuestionPalette();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      };
+
+      // 4. Toggle Flag
+      document.getElementById('flag-toggle-btn').onclick = () => {
+        if (flaggedQuestions.has(currentQuestionIdx)) {
+          flaggedQuestions.delete(currentQuestionIdx);
+          showToast(`問 ${currentQuestionIdx + 1} の見直しフラグを解除しました`);
+        } else {
+          flaggedQuestions.add(currentQuestionIdx);
+          showToast(`問 ${currentQuestionIdx + 1} に見直しフラグを設定しました`);
+        }
+        renderCurrentQuestion();
+        renderQuestionPalette();
+      };
+
+      // 5. Finish Exam Button
+      document.getElementById('finish-exam-btn').onclick = () => {
+        finishAndGradeExam();
+      };
+
+      // 6. Header Quit Button
+      document.getElementById('quit-exam-btn').onclick = () => {
+        if (window.confirm('模擬試験を中断してトップ画面に戻りますか？現在の解答内容は破棄されます。')) {
+          switchView('start');
+        }
+      };
+
+      // 7. Retry Button (Re-shuffles choices)
+      document.getElementById('retry-exam-btn').onclick = () => {
+        if (prepareExamSession()) {
+          switchView('exam');
+          startTimer();
+          showToast('選択肢を再シャッフルして試験を開始しました');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      };
+
+      // 8. Back to Home
+      document.getElementById('back-home-btn').onclick = () => {
+        switchView('start');
+      };
+
+      // 9. Review Filtering Buttons
+      const filterBtns = document.querySelectorAll('.review-filter-btn');
+      filterBtns.forEach(btn => {
+        btn.onclick = () => {
+          filterBtns.forEach(b => {
+            b.classList.remove('active', 'bg-blue-600', 'text-white');
+            b.classList.add('bg-slate-100', 'text-slate-700');
+          });
+          btn.classList.add('active', 'bg-blue-600', 'text-white');
+          btn.classList.remove('bg-slate-100', 'text-slate-700');
+
+          if (btn.id === 'filter-all-btn') renderReviewList('all');
+          if (btn.id === 'filter-wrong-btn') renderReviewList('wrong');
+          if (btn.id === 'filter-flagged-btn') renderReviewList('flagged');
+        };
+      });
+
+      // 10. Modal controls
+      const modal = document.getElementById('md-modal');
+      const openModalBtn = document.getElementById('open-md-modal-btn');
+      const previewPresetBtn = document.getElementById('preview-preset-md-btn');
+      const closeModalBtn = document.getElementById('close-md-modal-btn');
+      const cancelMdBtn = document.getElementById('cancel-md-btn');
+      const applyMdBtn = document.getElementById('apply-md-btn');
+      const loadSampleBtn = document.getElementById('load-sample-md-btn');
+      const fileInput = document.getElementById('md-file-input');
+      const textarea = document.getElementById('md-textarea');
+
+      const openModal = () => {
+        modal.classList.remove('hidden');
+      };
+      const closeModal = () => {
+        modal.classList.add('hidden');
+      };
+
+      openModalBtn.onclick = openModal;
+      previewPresetBtn.onclick = () => {
+        textarea.value = DEFAULT_PRESET_MARKDOWN.trim();
+        openModal();
+      };
+      closeModalBtn.onclick = closeModal;
+      cancelMdBtn.onclick = closeModal;
+
+      loadSampleBtn.onclick = () => {
+        textarea.value = DEFAULT_PRESET_MARKDOWN.trim();
+      };
+
+      // File input reader
+      fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          textarea.value = evt.target.result;
+          showToast(`ファイル「${file.name}」を読み込みました`);
+        };
+        reader.readAsText(file, 'UTF-8');
+      };
+
+      // Apply Markdown Data
+      applyMdBtn.onclick = () => {
+        const text = textarea.value.trim();
+        if (!text) {
+          showToast('Markdownテキストを入力してください', true);
+          return;
+        }
+
+        const parsed = parseMarkdownQuestions(text);
+        if (parsed.length === 0) {
+          showToast('有効な問題が検出されませんでした。記法ルールをご確認ください。', true);
+          return;
+        }
+
+        questionsData = parsed;
+        document.getElementById('start-q-count').textContent = `${questionsData.length}問`;
+        closeModal();
+        showToast(`${questionsData.length} 問のMarkdown問題を正常に読み込みました！`);
+        switchView('start');
+      };
+    });
+  </script>
+</body>
+</html>
