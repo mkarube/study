@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マインドフルネス瞑想タイマー</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #131c2e;
+      --border: #23324d;
+      --text: #f1f5f9;
+      --text-muted: #8da2c0;
+      --accent-cyan: #38bdf8;
+      --accent-indigo: #818cf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      padding: 2.25rem 2rem;
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+    }
+
+    .subtitle {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      margin-bottom: 1.75rem;
+      text-align: center;
+    }
+
+    /* 設定エリア */
+    .settings-panel {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .setting-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .setting-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-chip {
+      flex: 1;
+      padding: 0.5rem 0.25rem;
+      font-size: 0.85rem;
+      background: #1e293b;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .btn-chip:hover {
+      background: #27354f;
+    }
+
+    .btn-chip.active {
+      background: var(--accent-cyan);
+      color: #090d16;
+      border-color: var(--accent-cyan);
+      font-weight: 600;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .sound-preview-btn {
+      align-self: flex-start;
+      background: transparent;
+      border: 1px solid #3b4d6b;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.4rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s;
+    }
+
+    .sound-preview-btn:hover {
+      color: var(--text);
+      border-color: var(--accent-cyan);
+    }
+
+    /* タイマー表示部 */
+    .timer-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+
+    .guide-text {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      min-height: 1.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      transition: color 0.3s;
+    }
+
+    .timer-display {
+      font-size: 4.5rem;
+      font-weight: 200;
+      letter-spacing: 0.05em;
+      color: var(--accent-cyan);
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 1.25rem;
+      text-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background-color: #1e293b;
+      border-radius: 9999px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .progress-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-indigo));
+      transition: width 1s linear;
+    }
+
+    /* コントロール */
+    .controls {
+      display: flex;
+      gap: 1rem;
+      width: 100%;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    button.btn-main {
+      padding: 0.85rem 2.25rem;
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-cyan);
+      color: #090d16;
+    }
+
+    .btn-primary:hover {
+      background-color: #7dd3fc;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .btn-secondary {
+      background-color: #243046;
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background-color: #334360;
+    }
+
+    .bell-hint {
+      font-size: 0.75rem;
+      color: #64748b;
+      text-align: center;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>マインドフルネス瞑想</h1>
+    <div class="subtitle">自然な呼吸と身体の感覚を見守る時間</div>
+
+    <!-- 設定パネル -->
+    <div class="settings-panel">
+      <!-- 時間選択 -->
+      <div class="setting-group">
+        <label class="setting-label">瞑想時間</label>
+        <div class="btn-group" id="durationGroup">
+          <button class="btn-chip" data-time="180">3分</button>
+          <button class="btn-chip active" data-time="300">5分</button>
+          <button class="btn-chip" data-time="600">10分</button>
+          <button class="btn-chip" data-time="900">15分</button>
+        </div>
+      </div>
+
+      <!-- 鐘の音色選択 -->
+      <div class="setting-group">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.2rem;">
+          <label class="setting-label">鐘の響き（音色プリセット）</label>
+          <button id="testSoundBtn" class="sound-preview-btn">
+            <span>▶ 試聴する</span>
+          </button>
+        </div>
+        <div class="btn-group" id="soundGroup">
+          <button class="btn-chip" data-sound="deep">深いおりん (低音)</button>
+          <button class="btn-chip active" data-sound="standard">標準おりん (432Hz)</button>
+          <button class="btn-chip" data-sound="clear">澄んだ高音 (ティンシャ)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- タイマー部 -->
+    <div class="timer-section">
+      <div id="guideText" class="guide-text">姿勢を正して開始を押してください</div>
+      <div id="timerDisplay" class="timer-display">05:00</div>
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- 操作ボタン -->
+    <div class="controls">
+      <button id="toggleBtn" class="btn-main btn-primary">開始</button>
+      <button id="resetBtn" class="btn-main btn-secondary">リセット</button>
+    </div>
+
+    <div class="bell-hint">
+      開始時・中間（半分）・終了時に自動で鐘が鳴ります。<br>
+      開始を押したら静かに目を閉じ、呼吸の感覚に意識を向けましょう。
+    </div>
+  </div>
+
+  <script>
+    // --- 音色プリセット定義 ---
+    const SOUND_PRESETS = {
+      deep: [
+        { freq: 216, gain: 0.50, decay: 6.0 },
+        { freq: 592, gain: 0.25, decay: 4.5 },
+        { freq: 1230, gain: 0.10, decay: 3.0 }
+      ],
+      standard: [
+        { freq: 432, gain: 0.45, decay: 4.5 },
+        { freq: 1184, gain: 0.25, decay: 3.2 },
+        { freq: 2460, gain: 0.12, decay: 2.0 }
+      ],
+      clear: [
+        { freq: 880, gain: 0.40, decay: 3.5 },
+        { freq: 1760, gain: 0.20, decay: 2.5 },
+        { freq: 3520, gain: 0.10, decay: 1.5 }
+      ]
+    };
+
+    // --- 状態管理 ---
+    let totalSeconds = 300;
+    let remainingSeconds = 300;
+    let timerId = null;
+    let isRunning = false;
+    let currentSoundKey = "standard";
+
+    // --- Web Audio API ---
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playBowlSound(presetKey = currentSoundKey) {
+      initAudio();
+      const now = audioCtx.currentTime;
+      const harmonics = SOUND_PRESETS[presetKey] || SOUND_PRESETS.standard;
+
+      harmonics.forEach(h => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(h.freq, now);
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(h.gain, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + h.decay);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + h.decay);
+      });
+    }
+
+    // --- DOM 要素 ---
+    const timerDisplay = document.getElementById("timerDisplay");
+    const guideText = document.getElementById("guideText");
+    const progressFill = document.getElementById("progressFill");
+    const toggleBtn = document.getElementById("toggleBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const durationChips = document.querySelectorAll("#durationGroup .btn-chip");
+    const soundChips = document.querySelectorAll("#soundGroup .btn-chip");
+    const testSoundBtn = document.getElementById("testSoundBtn");
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function updateGuideText(sec) {
+      const halfway = Math.floor(totalSeconds / 2);
+      if (sec === 0) {
+        guideText.textContent = "お疲れ様でした。ゆっくり目を開けてください。";
+      } else if (sec <= 30) {
+        guideText.textContent = "呼吸から全身の感覚へと意識を広げます";
+      } else if (sec === halfway) {
+        guideText.textContent = "折り返しです。雑念に気づいたら呼吸へ戻します";
+      } else if (sec < halfway) {
+        guideText.textContent = "呼吸に注意を戻し、自然な息を見守りましょう";
+      } else {
+        guideText.textContent = "鼻先やお腹の自然なふくらみ・縮みを感じます";
+      }
+    }
+
+    function tick() {
+      remainingSeconds--;
+      timerDisplay.textContent = formatTime(remainingSeconds);
+      progressFill.style.width = `${(remainingSeconds / totalSeconds) * 100}%`;
+      updateGuideText(remainingSeconds);
+
+      // 中間点判定（常に全体の半分で鳴動）
+      const halfway = Math.floor(totalSeconds / 2);
+      if (remainingSeconds === halfway) {
+        playBowlSound();
+      }
+
+      // 終了判定
+      if (remainingSeconds <= 0) {
+        clearInterval(timerId);
+        isRunning = false;
+        playBowlSound();
+        setTimeout(() => playBowlSound(), 2000); // 終了時は2回
+        toggleBtn.textContent = "開始";
+        toggleBtn.className = "btn-main btn-primary";
+        enableSettings(true);
+      }
+    }
+
+    function enableSettings(enabled) {
+      durationChips.forEach(btn => btn.style.pointerEvents = enabled ? "auto" : "none");
+    }
+
+    // --- イベントリスナー ---
+
+    // 時間切り替え
+    durationChips.forEach(chip => {
+      chip.addEventListener("click", () => {
+        if (isRunning) return;
+        durationChips.forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        totalSeconds = parseInt(chip.getAttribute("data-time"), 10);
+        remainingSeconds = totalSeconds;
+        timerDisplay.textContent = formatTime(totalSeconds);
+        progressFill.style.width = "100%";
+        guideText.textContent = "姿勢を正して開始を押してください";
+      });
+    });
+
+    // 音色切り替え
+    soundChips.forEach(chip => {
+      chip.addEventListener("click", () => {
+        soundChips.forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        currentSoundKey = chip.getAttribute("data-sound");
+      });
+    });
+
+    // 試聴ボタン
+    testSoundBtn.addEventListener("click", () => {
+      playBowlSound(currentSoundKey);
+    });
+
+    // 開始 / 一時停止
+    toggleBtn.addEventListener("click", () => {
+      initAudio();
+      if (!isRunning) {
+        if (remainingSeconds === totalSeconds) {
+          playBowlSound(); // 開始音
+        }
+        isRunning = true;
+        toggleBtn.textContent = "一時停止";
+        toggleBtn.className = "btn-main btn-secondary";
+        enableSettings(false);
+        timerId = setInterval(tick, 1000);
+      } else {
+        isRunning = false;
+        clearInterval(timerId);
+        toggleBtn.textContent = "再開";
+        toggleBtn.className = "btn-main btn-primary";
+      }
+    });
+
+    // リセット
+    resetBtn.addEventListener("click", () => {
+      isRunning = false;
+      clearInterval(timerId);
+      remainingSeconds = totalSeconds;
+      timerDisplay.textContent = formatTime(totalSeconds);
+      progressFill.style.width = "100%";
+      guideText.textContent = "姿勢を正して開始を押してください";
+      toggleBtn.textContent = "開始";
+      toggleBtn.className = "btn-main btn-primary";
+      enableSettings(true);
+    });
+  </script>
+</body>
+</html>
